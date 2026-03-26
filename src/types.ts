@@ -10,8 +10,6 @@ export type Segment = THREE.Vector2[];
 
 export type ProcessedTriangleEdge = TriangleEdge & {
     edgeSegments: Segment[];
-    // wywal
-    originalProjectedStart: THREE.Vector2;
 }
 
 export type TriangleData = TriangleEdge[];

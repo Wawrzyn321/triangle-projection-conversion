@@ -7,7 +7,7 @@ import { HEIGHT, WIDTH } from './App';
 export async function algo(camera: THREE.Camera, renderer: THREE.WebGLRenderer, callback: (data: AlgoReturn) => Promise<void>): Promise<AlgoReturn> {
   const p_triangles: ProcessedTriangleData[] = [FIRST_TRIANGLE, SECOND_TRIANGLE
     , THIRD_TRIANGLE
-  ].map((triangle, i) => {
+  ].map(triangle => {
     const vert1 = new THREE.Vector3(triangle[0], triangle[1], triangle[2]);
     const vert2 = new THREE.Vector3(triangle[3], triangle[4], triangle[5]);
     const vert3 = new THREE.Vector3(triangle[6], triangle[7], triangle[8]);
@@ -16,7 +16,6 @@ export async function algo(camera: THREE.Camera, renderer: THREE.WebGLRenderer, 
       {
         start: vert1,
         end: vert2,
-        originalProjectedStart: worldToScreen(vert1, camera, renderer),
         edgeSegments: [
           [(worldToScreen(vert1, camera, renderer)),
           (worldToScreen(vert2, camera, renderer))]
@@ -25,7 +24,6 @@ export async function algo(camera: THREE.Camera, renderer: THREE.WebGLRenderer, 
       {
         start: vert2,
         end: vert3,
-        originalProjectedStart: worldToScreen(vert2, camera, renderer),
         edgeSegments: [
           [(worldToScreen(vert2, camera, renderer)),
           (worldToScreen(vert3, camera, renderer))]
@@ -34,7 +32,6 @@ export async function algo(camera: THREE.Camera, renderer: THREE.WebGLRenderer, 
       {
         start: vert3,
         end: vert1,
-        originalProjectedStart: worldToScreen(vert3, camera, renderer),
         edgeSegments: [
           [(worldToScreen(vert3, camera, renderer)),
           (worldToScreen(vert1, camera, renderer))
@@ -128,25 +125,30 @@ export async function algo(camera: THREE.Camera, renderer: THREE.WebGLRenderer, 
 
                 // const D = P1.sub(P0).normalize();
 
-                const cameraDir = new THREE.Vector3();
-                camera.getWorldDirection(cameraDir);
+                // const cameraDir = new THREE.Vector3();
+                // camera.getWorldDirection(cameraDir);
 
-                const P1 = intersectRayWithTriangle(P0, cameraDir, currentTriangle[0].start, currentTriangle[1].start, currentTriangle[2].start);
-                const P2 = intersectRayWithTriangle(P0, cameraDir, otherTriangle[0].start, otherTriangle[1].start, otherTriangle[2].start);
+                // const P1 = intersectRayWithTriangle(P0, cameraDir, currentTriangle[0].start, currentTriangle[1].start, currentTriangle[2].start);
+                // const P2 = intersectRayWithTriangle(P0, cameraDir, otherTriangle[0].start, otherTriangle[1].start, otherTriangle[2].start);
 
-                const D = camera.getWorldDirection(new THREE.Vector3()); // kierunek równoległy
+                // const D = camera.getWorldDirection(new THREE.Vector3()); // kierunek równoległy
 
-                if (P1 && P2) {
-                  const toP1 = new THREE.Vector3().subVectors(P1, camera.position);
-                  const toP2 = new THREE.Vector3().subVectors(P2, camera.position);
+                // if (P1 && P2) {
+                //   const toP1 = new THREE.Vector3().subVectors(P1, camera.position);
+                //   const toP2 = new THREE.Vector3().subVectors(P2, camera.position);
 
-                  const t1 = toP1.dot(D);
-                  const t2 = toP2.dot(D);
+                //   const t1 = toP1.dot(D);
+                //   const t2 = toP2.dot(D);
 
-                  currentIsCloser = t1 < t2;
-                }
+                //   currentIsCloser = t1 < t2;
+                // }
 
-                if (currentIsCloser) {
+                const i = intersection3d(camera,
+                  [currentTriangleEdge.start, currentTriangleEdge.end],
+                  [otherTriangleEdge.start, otherTriangleEdge.end]);
+                console.log(i, currentIsCloser)
+
+                if (i) {
                   const otherTrianglePointASide = pointSideOfSegment(currentTriangleEdgeSegment[0], currentTriangleEdgeSegment[1], otherTriangleEdgeSegment[0]);
                   const otherTrianglePointBSide = pointSideOfSegment(currentTriangleEdgeSegment[0], currentTriangleEdgeSegment[1], otherTriangleEdgeSegment[1]);
                   if (otherTrianglePointASide === otherTrianglePointBSide) {
@@ -352,7 +354,6 @@ export function sortTriangle(source: ProcessedTriangleData): ProcessedTriangleDa
       edgeSegments: edge.edgeSegments.map(segment =>
         segment.map(v => v.clone()),
       ),
-      originalProjectedStart: edge.originalProjectedStart.clone(),
     }));
 
     // Flip all edges
@@ -375,7 +376,6 @@ export function copyTriangleData(source: ProcessedTriangleData): ProcessedTriang
   return source.map(edge => ({
     start: edge.start.clone(),
     end: edge.end.clone(),
-    originalProjectedStart: edge.originalProjectedStart.clone(),
     edgeSegments: edge.edgeSegments.map(segment =>
       segment.map(v => v.clone())
     )
@@ -441,4 +441,78 @@ function intersectRayWithTriangle(P0: THREE.Vector3, D: THREE.Vector3, A: THREE.
   }
 
   return null;
+}
+
+
+function intersection3d(camera: THREE.Camera, segmentA: [THREE.Vector3, THREE.Vector3], segmentB: [THREE.Vector3, THREE.Vector3]) {
+  const D = new THREE.Vector3();
+  camera.getWorldDirection(D);
+  const z = D.clone().normalize(); // view direction
+
+  // pick any vector not parallel to z
+  const tmp = Math.abs(z.x) > 0.9
+    ? new THREE.Vector3(0, 1, 0)
+    : new THREE.Vector3(1, 0, 0);
+
+  const x = new THREE.Vector3().crossVectors(tmp, z).normalize();
+  const y = new THREE.Vector3().crossVectors(z, x).normalize();
+
+
+  function project(p: THREE.Vector3) {
+    return new THREE.Vector3(
+      p.dot(x),
+      p.dot(y),
+      p.dot(z) // keep depth!
+    );
+  }
+
+  function intersect2D(p: THREE.Vector3, p2: THREE.Vector3, q: THREE.Vector3, q2: THREE.Vector3) {
+    const r = { x: p2.x - p.x, y: p2.y - p.y };
+    const s = { x: q2.x - q.x, y: q2.y - q.y };
+
+    const cross = (a: THREE.Vector2Like, b: THREE.Vector2Like) => a.x * b.y - a.y * b.x;
+
+    const denom = cross(r, s);
+    if (Math.abs(denom) < 1e-8) return null; // parallel
+
+    const t = cross({ x: q.x - p.x, y: q.y - p.y }, s) / denom;
+    const u = cross({ x: q.x - p.x, y: q.y - p.y }, r) / denom;
+
+    if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+      return {
+        x: p.x + t * r.x,
+        y: p.y + t * r.y,
+        t,
+        u
+      };
+    }
+
+    return null;
+  }
+
+  const A0p = project(segmentA[0])
+  const A1p = project(segmentA[1])
+  const B0p = project(segmentB[0])
+  const B1p = project(segmentB[1])
+
+  const intersection = (intersect2D(
+    A0p,
+    A1p,
+    B0p,
+    B1p,
+  ))
+  if (!intersection) {
+    return null;
+  } else {
+    const zA = A0p.z + intersection.t * (A1p.z - A0p.z);
+    const zB = B0p.z + intersection.u * (B1p.z - B0p.z);
+    if (Math.abs(zA - zB) < 0.00001) {
+      return null;
+    } else if (zA < zB) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
 }

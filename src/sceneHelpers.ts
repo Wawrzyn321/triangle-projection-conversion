@@ -3,22 +3,19 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
-export function createCamera(ortho: boolean, aspect: number) {
-    if (ortho) {
-        const frustumSize = 10;
-        const camera = new THREE.OrthographicCamera(
-            frustumSize * aspect / -2,
-            frustumSize * aspect / 2,
-            frustumSize / 2,
-            frustumSize / -2,
-            0.1,
-            1000
-        );
-        camera.position.set(0, 0, 10000);
-        camera.lookAt(0, 0, 0);
-        return camera;
-    }
-    return new THREE.PerspectiveCamera(75, aspect, 0.1, 1000);
+export function createCamera(aspect: number) {
+    const frustumSize = 10;
+    const camera = new THREE.OrthographicCamera(
+        frustumSize * aspect / -2,
+        frustumSize * aspect / 2,
+        frustumSize / 2,
+        frustumSize / -2,
+        0.1,
+        1000
+    );
+    camera.position.set(0, 0, 10000);
+    camera.lookAt(0, 0, 0);
+    return camera;
 }
 
 export function worldToScreen(
@@ -66,4 +63,10 @@ export function createTriangle(verts: number[], color: number) {
     const triangle = new THREE.Mesh(geometry, material);
 
     return triangle;
+}
+
+export function createLine(points: [THREE.Vector3, THREE.Vector3], color: number) {
+    const material = new THREE.LineBasicMaterial({ color });
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    return new THREE.Line(geometry, material);
 }
