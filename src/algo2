@@ -1,0 +1,269 @@
+// import * as THREE from 'three';
+// import { FIRST_TRIANGLE, SECOND_TRIANGLE, THIRD_TRIANGLE } from './triangles';
+// import { worldToScreen } from './sceneHelpers';
+// import { AlgoReturn } from './types';
+// import { HEIGHT, WIDTH } from './App';
+
+// type Split = {
+//   intersection: ReturnType<typeof intersection3d> | null;
+//   at: number;
+// }
+
+// type Segment = {
+//   d2: [THREE.Vector2, THREE.Vector2];
+//   d3: [THREE.Vector3, THREE.Vector3];
+//   splits: Split[];
+// }
+
+// type ProcessedTriangleData = {
+//   id: number;
+//   segments: Segment[]
+// }
+
+// export async function algo2(camera: THREE.Camera, renderer: THREE.WebGLRenderer, meshes: THREE.Mesh[]): Promise<AlgoReturn> {
+//   const raycaster = new THREE.Raycaster();
+//   const worldToScreenBound = (point: THREE.Vector3) => worldToScreen(point, camera, renderer)
+
+//   const triangles: ProcessedTriangleData[] = [FIRST_TRIANGLE, SECOND_TRIANGLE
+//     , THIRD_TRIANGLE
+//   ].map((triangle, i) => {
+//     let vert1 = new THREE.Vector3(triangle[0], triangle[1], triangle[2]);
+//     let vert2 = new THREE.Vector3(triangle[3], triangle[4], triangle[5]);
+//     let vert3 = new THREE.Vector3(triangle[6], triangle[7], triangle[8]);
+
+//     function isClockwise(p1: THREE.Vector2, p2: THREE.Vector2, p3: THREE.Vector2) {
+//       return (
+//         (p2.x - p1.x) * (p3.y - p1.y) -
+//         (p2.y - p1.y) * (p3.x - p1.x)
+//       ) < 0;
+//     }
+//     const p1 = worldToScreenBound(vert1);
+//     const p2 = worldToScreenBound(vert2);
+//     const p3 = worldToScreenBound(vert3);
+
+//     if (!isClockwise(p1, p2, p3)) {
+//       // swap vert2 and vert3
+//       [vert2, vert3] = [vert3, vert2];
+//     }
+
+//     return {
+//       id: meshes[i].id,
+//       segments: [
+//         {
+//           d2: [worldToScreenBound(vert1), worldToScreenBound(vert2)],
+//           d3: [vert1, vert2],
+//           splits: [
+//             { at: 0, intersection: null },
+//             { at: 1, intersection: null },
+//           ]
+//         },
+//         {
+//           d2: [worldToScreenBound(vert2), worldToScreenBound(vert3)],
+//           d3: [vert2, vert3],
+//           splits: [
+//             { at: 0, intersection: null },
+//             { at: 1, intersection: null },],
+//         },
+//         {
+//           d2: [worldToScreenBound(vert3), worldToScreenBound(vert1)],
+//           d3: [vert3, vert1],
+//           splits: [
+//             { at: 0, intersection: null },
+//             { at: 1, intersection: null },
+//           ],
+//         }
+//       ]
+//     }
+//   });
+
+//   const debugLines: THREE.Vector2[][] = [];
+//   const debugPoints: THREE.Vector2[] = [];
+
+//   for (let i = 0; i < triangles.length; i++) {
+//     for (let j = 0; j < triangles.length; j++) {
+//       if (i === j) continue;
+
+//       for (let iS = 0; iS < triangles[i].segments.length; iS++) {
+//         for (const otherSegment of triangles[j].segments) {
+//           const intersection = intersection3d(camera, triangles[i].segments[iS].d3, otherSegment.d3)
+//           if (intersection) {
+//             triangles[i].segments[iS].splits.push({
+//               at: intersection.intersection.t,
+//               intersection
+//             })
+//           }
+//         }
+//       }
+//     }
+//   }
+
+//   for (const tri of triangles) {
+//     for (const e of tri.segments) {
+//       e.splits.sort((a, b) => a.at - b.at)
+//     }
+//   }
+
+//   for (const tri of triangles) {
+//     for (const e of tri.segments) {
+//       for (const split of e.splits) {
+//         const pt = e.d3[0].clone().lerp(e.d3[1], split.at);
+//         // debugPoints.push(worldToScreenBound(pt))
+//       }
+//       for (let i = 0; i < e.splits.length - 1; i++) {
+//         const p1 = e.d3[0].clone().lerp(e.d3[1], e.splits[i].at);
+//         const p2 = e.d3[0].clone().lerp(e.d3[1], e.splits[i + 1].at);
+//         // if ((e.splits[i].intersection?.aFront ?? true) || (e.splits[i + 1].intersection?.aFront ?? true)) {
+//         //   debugLines.push(
+//         //     [worldToScreenBound(p1),
+//         //     worldToScreenBound(p2)]
+//         //   )
+//         // }
+//         const p2d1 = e.d2[0].clone().lerp(e.d2[1], e.splits[i].at);
+//         const p2d2 = e.d2[0].clone().lerp(e.d2[1], e.splits[i + 1].at);
+//         const ndc = p2d1.clone().add(p2d2).divideScalar(2);
+//         debugPoints.push(ndc.clone());
+//         ndc.setX(((ndc.x / WIDTH) - 0.5) * 2);
+//         ndc.setY(((ndc.y / HEIGHT) - 0.5) * 2);
+
+//         camera.updateMatrixWorld();
+//         raycaster.setFromCamera(ndc, camera)
+
+//         const intersects = raycaster.intersectObjects(meshes, false)
+//         if (intersects[0]?.object.id === e.splits[i].intersection) {
+//           debugLines.push(
+//             [worldToScreenBound(p1),
+//             worldToScreenBound(p2)]
+//           )
+//         } else {
+//           console.log('nie')
+//         }
+
+//       }
+//     }
+//   }
+
+//   return {
+//     processedTriangleData: [],
+//     debugLines,
+//     debugPoints,
+//   };
+// }
+
+// function intersection3d(camera: THREE.Camera, segmentA: [THREE.Vector3, THREE.Vector3], segmentB: [THREE.Vector3, THREE.Vector3]) {
+//   const D = new THREE.Vector3();
+//   camera.getWorldDirection(D);
+//   const z = D.clone().normalize(); // view direction
+
+//   // pick any vector not parallel to z
+//   const tmp = Math.abs(z.x) > 0.9
+//     ? new THREE.Vector3(0, 1, 0)
+//     : new THREE.Vector3(1, 0, 0);
+
+//   const x = new THREE.Vector3().crossVectors(tmp, z).normalize();
+//   const y = new THREE.Vector3().crossVectors(z, x).normalize();
+
+
+//   function project(p: THREE.Vector3) {
+//     return new THREE.Vector3(
+//       p.dot(x),
+//       p.dot(y),
+//       p.dot(z) // keep depth!
+//     );
+//   }
+
+//   function intersect2D(p: THREE.Vector3, p2: THREE.Vector3, q: THREE.Vector3, q2: THREE.Vector3) {
+//     const r = { x: p2.x - p.x, y: p2.y - p.y };
+//     const s = { x: q2.x - q.x, y: q2.y - q.y };
+
+//     const cross = (a: THREE.Vector2Like, b: THREE.Vector2Like) => a.x * b.y - a.y * b.x;
+
+//     const denom = cross(r, s);
+//     if (Math.abs(denom) < 1e-8) return null; // parallel
+
+//     const t = cross({ x: q.x - p.x, y: q.y - p.y }, s) / denom;
+//     const u = cross({ x: q.x - p.x, y: q.y - p.y }, r) / denom;
+
+//     if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+//       return {
+//         x: p.x + t * r.x,
+//         y: p.y + t * r.y,
+//         t,
+//         u
+//       };
+//     }
+
+//     return null;
+//   }
+
+//   const A0p = project(segmentA[0])
+//   const A1p = project(segmentA[1])
+//   const B0p = project(segmentB[0])
+//   const B1p = project(segmentB[1])
+
+//   const intersection = (intersect2D(
+//     A0p,
+//     A1p,
+//     B0p,
+//     B1p,
+//   ))
+//   if (!intersection) {
+//     return null;
+//   } else {
+//     const P_A = new THREE.Vector3(
+//       A0p.x + intersection.t * (A1p.x - A0p.x),
+//       A0p.y + intersection.t * (A1p.y - A0p.y),
+//       A0p.z + intersection.t * (A1p.z - A0p.z)
+//     );
+
+//     // Point along triangle B edge
+//     const P_B = new THREE.Vector3(
+//       B0p.x + intersection.u * (B1p.x - B0p.x),
+//       B0p.y + intersection.u * (B1p.y - B0p.y),
+//       B0p.z + intersection.u * (B1p.z - B0p.z)
+//     )
+
+
+//     const zA = A0p.z + intersection.t * (A1p.z - A0p.z);
+//     const zB = B0p.z + intersection.u * (B1p.z - B0p.z);
+//     if (Math.abs(zA - zB) < 0.00001) {
+//       return null;
+//     } else if (zA < zB) {
+//       return {
+//         aFront: true,
+//         P_A,
+//         P_B,
+//         intersection
+//       };
+//     } else {
+//       return {
+//         aFront: false,
+//         P_A,
+//         P_B,
+//         intersection
+//       };
+//     }
+//   }
+
+// }
+
+// function pointInTriangle(
+//   pt: THREE.Vector2,
+//   v1: THREE.Vector2,
+//   v2: THREE.Vector2,
+//   v3: THREE.Vector2
+// ): boolean {
+
+//   function sign(p1: THREE.Vector2, p2: THREE.Vector2, p3: THREE.Vector2) {
+//     return (p1.x - p3.x) * (p2.y - p3.y) -
+//       (p2.x - p3.x) * (p1.y - p3.y);
+//   }
+
+//   const d1 = sign(pt, v1, v2);
+//   const d2 = sign(pt, v2, v3);
+//   const d3 = sign(pt, v3, v1);
+
+//   const hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+//   const hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+//   return !(hasNeg && hasPos);
+// }

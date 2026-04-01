@@ -18,21 +18,6 @@ export function createCamera(aspect: number) {
     return camera;
 }
 
-export function worldToScreen(
-    pos: THREE.Vector3,
-    camera: THREE.Camera,
-    renderer: THREE.WebGLRenderer
-) {
-    const vector = pos.clone().project(camera);
-    const widthHalf = renderer.domElement.width / 2;
-    const heightHalf = renderer.domElement.height / 2;
-
-    return new THREE.Vector2(
-        vector.x * widthHalf + widthHalf,
-        -vector.y * heightHalf + heightHalf
-    );
-}
-
 export function setupControls(camera: THREE.Camera, renderer: THREE.WebGLRenderer) {
     const controls = new OrbitControls(camera, renderer.domElement);
 

@@ -12,9 +12,9 @@ export type ProcessedTriangleEdge = TriangleEdge & {
     edgeSegments: Segment[];
 }
 
-export type TriangleData = TriangleEdge[];
-
-export type ProcessedTriangleData = ProcessedTriangleEdge[];
+export type ProcessedTriangleData = {
+    edges: ProcessedTriangleEdge[];
+}
 
 export type AlgoReturn = {
     processedTriangleData: ProcessedTriangleData[];

@@ -1,4 +1,4 @@
-import { AlgoReturn, } from "./types";
+import { AlgoReturn, } from "../types";
 import * as THREE from 'three';
 
 export function drawFromSegments(canvas: HTMLCanvasElement | null, data: AlgoReturn) {
@@ -11,7 +11,7 @@ export function drawFromSegments(canvas: HTMLCanvasElement | null, data: AlgoRet
     ctx.strokeStyle = "black";
 
     for (const triangle of data.processedTriangleData) {
-        for (const edge of triangle) {
+        for (const edge of triangle.edges) {
             for (const segment of edge.edgeSegments) {
                 drawLine(ctx, segment[0], segment[1]);
             }
@@ -24,11 +24,8 @@ export function drawFromSegments(canvas: HTMLCanvasElement | null, data: AlgoRet
     }
 
     ctx.fillStyle = 'red';
-    let i = 0;
     for (const point of data.debugPoints) {
-        // if (i >= 6 && i < 8)
         drawPoint(ctx, point);
-        i++;
     }
 }
 
