@@ -1,0 +1,113 @@
+
+// function intersectRayWithTriangle(P0: THREE.Vector3, D: THREE.Vector3, A: THREE.Vector3, B: THREE.Vector3, C: THREE.Vector3, eps = 1e-4) {
+//   const AB = B.clone().sub(A);
+//   const AC = C.clone().sub(A);
+//   const N = AB.clone().cross(AC);
+
+//   const denom = N.dot(D);
+
+//   if (Math.abs(denom) < eps) {
+//     throw Error("ROWNLEGOEL")
+//   }
+
+//   const t = N.dot(A.clone().sub(P0)) / denom;
+
+//   const P = P0.clone().add(D.clone().multiplyScalar(t));
+
+//   // barycentric
+//   const v0 = B.clone().sub(A);
+//   const v1 = C.clone().sub(A);
+//   const v2 = P.clone().sub(A);
+
+//   const d00 = v0.dot(v0);
+//   const d01 = v0.dot(v1);
+//   const d11 = v1.dot(v1);
+//   const d20 = v2.dot(v0);
+//   const d21 = v2.dot(v1);
+
+//   const denom2 = d00 * d11 - d01 * d01;
+
+//   const v = (d11 * d20 - d01 * d21) / denom2;
+//   const w = (d00 * d21 - d01 * d20) / denom2;
+//   const u = 1 - v - w;
+
+//   if (u >= -eps && v >= -eps && w >= -eps) {
+//     return P; // trafienie (z tolerancją)
+//   }
+
+//   return null;
+// }
+
+
+// function intersection3d(camera: THREE.Camera, segmentA: [THREE.Vector3, THREE.Vector3], segmentB: [THREE.Vector3, THREE.Vector3]) {
+//   const D = new THREE.Vector3();
+//   camera.getWorldDirection(D);
+//   const z = D.clone().normalize(); // view direction
+
+//   // pick any vector not parallel to z
+//   const tmp = Math.abs(z.x) > 0.9
+//     ? new THREE.Vector3(0, 1, 0)
+//     : new THREE.Vector3(1, 0, 0);
+
+//   const x = new THREE.Vector3().crossVectors(tmp, z).normalize();
+//   const y = new THREE.Vector3().crossVectors(z, x).normalize();
+
+
+//   function project(p: THREE.Vector3) {
+//     return new THREE.Vector3(
+//       p.dot(x),
+//       p.dot(y),
+//       p.dot(z) // keep depth!
+//     );
+//   }
+
+//   function intersect2D(p: THREE.Vector3, p2: THREE.Vector3, q: THREE.Vector3, q2: THREE.Vector3) {
+//     const r = { x: p2.x - p.x, y: p2.y - p.y };
+//     const s = { x: q2.x - q.x, y: q2.y - q.y };
+
+//     const cross = (a: THREE.Vector2Like, b: THREE.Vector2Like) => a.x * b.y - a.y * b.x;
+
+//     const denom = cross(r, s);
+//     if (Math.abs(denom) < 1e-8) return null; // parallel
+
+//     const t = cross({ x: q.x - p.x, y: q.y - p.y }, s) / denom;
+//     const u = cross({ x: q.x - p.x, y: q.y - p.y }, r) / denom;
+
+//     if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+//       return {
+//         x: p.x + t * r.x,
+//         y: p.y + t * r.y,
+//         t,
+//         u
+//       };
+//     }
+
+//     return null;
+//   }
+
+//   const A0p = project(segmentA[0])
+//   const A1p = project(segmentA[1])
+//   const B0p = project(segmentB[0])
+//   const B1p = project(segmentB[1])
+
+//   const intersection = (intersect2D(
+//     A0p,
+//     A1p,
+//     B0p,
+//     B1p,
+//   ))
+//   if (!intersection) {
+//     return null;
+//   } else {
+//     const zA = A0p.z + intersection.t * (A1p.z - A0p.z);
+//     const zB = B0p.z + intersection.u * (B1p.z - B0p.z);
+//     if (Math.abs(zA - zB) < 0.00001) {
+//       return null;
+//     } else if (zA < zB) {
+//       return true;
+//     } else {
+//       return false;
+//     }
+//   }
+
+// }

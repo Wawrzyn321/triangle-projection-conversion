@@ -1,19 +1,22 @@
 import * as THREE from 'three';
 import { projectionToScreen } from './utils/projectionToScreen';
 import { worldToProjection } from './utils/worldToProjection';
-import { ProcessedTriangleData, AlgoReturn, Segment } from './types';
+import { ProcessedTriangleData, AlgoReturn, Segment2d } from './types';
 import { mapInitialTriangles } from './utils/mapInitialTriangles';
 import { copyTriangleData } from './utils/copyTriangleData';
+import { pointSideOfSegment } from './utils/pointSideOfSegment';
+import { pointInTriangle } from './utils/pointInTriangle';
+import { segmentIntersection } from './utils/segmentIntersection';
+import { sortTriangle } from './utils/sortTriangle';
 
 type Args = {
   camera: THREE.Camera,
   viewProjectionMatrix: THREE.Matrix4;
-  domElementSize: THREE.Vector2,
   callback: (data: AlgoReturn) => Promise<void>
   inputTriangles: number[][]
 }
 
-export async function algo({ camera, viewProjectionMatrix, domElementSize, callback, inputTriangles }: Args): Promise<AlgoReturn> {
+export async function algo({ camera, viewProjectionMatrix, callback, inputTriangles }: Args): Promise<AlgoReturn> {
   const worldToProjectionBound = (point: THREE.Vector3) => {
     return worldToProjection(point, viewProjectionMatrix)
   }
@@ -21,7 +24,7 @@ export async function algo({ camera, viewProjectionMatrix, domElementSize, callb
   const triangles: ProcessedTriangleData[] = mapInitialTriangles(inputTriangles, worldToProjectionBound);
 
   let processedTriangles: ProcessedTriangleData[] = [];
-  const debugLines: Segment[] = [];
+  const debugLines: Segment2d[] = [];
   const debugPoints: THREE.Vector2[] = [];
 
   for (const triangle of triangles) {
@@ -37,15 +40,15 @@ export async function algo({ camera, viewProjectionMatrix, domElementSize, callb
       // intersections for other triangle
       console.assert(currentTriangle.edges.length === 3);
       for (let currentTriangleEdgeIndex = 0; currentTriangleEdgeIndex < 3; currentTriangleEdgeIndex++) {
-        const newSegmentsForCurrentTriangle: Segment[] = [];
+        const newSegmentsForCurrentTriangle: Segment2d[] = [];
 
         const currentTriangleEdge = currentTriangle.edges[currentTriangleEdgeIndex];
-        for (const currentTriangleEdgeSegment of currentTriangleEdge.edgeSegments) {
+        for (const currentTriangleEdgeSegment of currentTriangleEdge.edgeSegments2d) {
           console.assert(otherTriangle.edges.length === 3);
           for (let otherTriangleEdgeIndex = 0; otherTriangleEdgeIndex < 3; otherTriangleEdgeIndex++) {
             const otherTriangleEdge = otherTriangle.edges[otherTriangleEdgeIndex];
-            const newSegmentsForOtherTriangle: Segment[] = [];
-            for (const otherTriangleEdgeSegment of otherTriangleEdge.edgeSegments) {
+            const newSegmentsForOtherTriangle: Segment2d[] = [];
+            for (const otherTriangleEdgeSegment of otherTriangleEdge.edgeSegments2d) {
               await callback({
                 processedTriangleData: processedTriangles,
                 debugLines: [
@@ -65,48 +68,13 @@ export async function algo({ camera, viewProjectionMatrix, domElementSize, callb
               if (intersectionPoint) {
                 debugPoints.push(intersectionPoint);
 
-                // to może jebnąć
-                // a) liczymy punkt pośrodku krawędzi, a nie tam gdzie jest przecięcie
                 const midCurrentTriangleEdge = currentTriangleEdge.start.clone().add(currentTriangleEdge.end).divideScalar(2);
                 const midOtherTriangleEdge = otherTriangleEdge.start.clone().add(otherTriangleEdge.end).divideScalar(2);
                 const midCurrentTriangleEdgeCameraDistance2 = midCurrentTriangleEdge.clone().project(camera).z;
                 const midOtherTriangleEdgeCameraDistance2 = midOtherTriangleEdge.clone().project(camera).z;
                 let currentIsCloser = midCurrentTriangleEdgeCameraDistance2 < midOtherTriangleEdgeCameraDistance2;
 
-                // ortho
-                // const ndc = new THREE.Vector3(intersectionPoint.x, intersectionPoint.y, 0.5); // z = 0.5 (mid depth)
-                // const P0 = ndc.unproject(camera); // w world space
-                //todo dla perspective
-                // const P0 = camera.position.clone();
-
-                // const P1 = new THREE.Vector3(x, y, 0.5).unproject(camera);
-
-                // const D = P1.sub(P0).normalize();
-
-                // const cameraDir = new THREE.Vector3();
-                // camera.getWorldDirection(cameraDir);
-
-                // const P1 = intersectRayWithTriangle(P0, cameraDir, currentTriangle[0].start, currentTriangle[1].start, currentTriangle[2].start);
-                // const P2 = intersectRayWithTriangle(P0, cameraDir, otherTriangle[0].start, otherTriangle[1].start, otherTriangle[2].start);
-
-                // const D = camera.getWorldDirection(new THREE.Vector3()); // kierunek równoległy
-
-                // if (P1 && P2) {
-                //   const toP1 = new THREE.Vector3().subVectors(P1, camera.position);
-                //   const toP2 = new THREE.Vector3().subVectors(P2, camera.position);
-
-                //   const t1 = toP1.dot(D);
-                //   const t2 = toP2.dot(D);
-
-                //   currentIsCloser = t1 < t2;
-                // }
-
-                const i = intersection3d(camera,
-                  [currentTriangleEdge.start, currentTriangleEdge.end],
-                  [otherTriangleEdge.start, otherTriangleEdge.end]);
-                console.log(i, currentIsCloser)
-
-                if (i) {
+                if (currentIsCloser) {
                   const otherTrianglePointASide = pointSideOfSegment(currentTriangleEdgeSegment[0], currentTriangleEdgeSegment[1], otherTriangleEdgeSegment[0]);
                   const otherTrianglePointBSide = pointSideOfSegment(currentTriangleEdgeSegment[0], currentTriangleEdgeSegment[1], otherTriangleEdgeSegment[1]);
                   if (otherTrianglePointASide === otherTrianglePointBSide) {
@@ -118,14 +86,12 @@ export async function algo({ camera, viewProjectionMatrix, domElementSize, callb
                         otherTriangleEdgeSegment[0],
                         intersectionPoint,
                       ]);
-                      // debugPoints.push(intersectionPoint.clone().lerp(otherTriangleEdgeSegment[0], 0.5));
                     } else {
                       debugPoints.push(otherTriangleEdgeSegment[1]);
                       newSegmentsForOtherTriangle.push([
                         intersectionPoint,
                         otherTriangleEdgeSegment[1],
                       ]);
-                      // debugPoints.push(intersectionPoint.clone().lerp(otherTriangleEdgeSegment[1], 0.5))
                     }
                   }
                 } else {
@@ -140,7 +106,6 @@ export async function algo({ camera, viewProjectionMatrix, domElementSize, callb
                         currentTriangleEdgeSegment[0],
                         intersectionPoint,
                       ]);
-                      // debugPoints.push(intersectionPoint.clone().lerp(currentTriangleEdgeSegment[0], 0.5))
                     } else {
                       debugPoints.push(currentTriangleEdgeSegment[1]);
                       newSegmentsForCurrentTriangle.push([
@@ -155,16 +120,16 @@ export async function algo({ camera, viewProjectionMatrix, domElementSize, callb
 
             if (newSegmentsForOtherTriangle.length) {
               if (!touched[otherTriangleEdgeIndex]) {
-                OTHER_TRIANGLE_NEW_DATA.edges[otherTriangleEdgeIndex].edgeSegments = newSegmentsForOtherTriangle;
+                OTHER_TRIANGLE_NEW_DATA.edges[otherTriangleEdgeIndex].edgeSegments2d = newSegmentsForOtherTriangle;
                 touched[otherTriangleEdgeIndex] = true;
               } else {
-                OTHER_TRIANGLE_NEW_DATA.edges[otherTriangleEdgeIndex].edgeSegments.push(...newSegmentsForOtherTriangle);
+                OTHER_TRIANGLE_NEW_DATA.edges[otherTriangleEdgeIndex].edgeSegments2d.push(...newSegmentsForOtherTriangle);
               }
             }
           }
         }
         if (newSegmentsForCurrentTriangle.length) {
-          CURRENT_TRIANGLE_NEW_DATA.edges[currentTriangleEdgeIndex].edgeSegments = newSegmentsForCurrentTriangle;
+          CURRENT_TRIANGLE_NEW_DATA.edges[currentTriangleEdgeIndex].edgeSegments2d = newSegmentsForCurrentTriangle;
         }
       }
       nextProcessedTriangles.push(OTHER_TRIANGLE_NEW_DATA);
@@ -183,12 +148,12 @@ export async function algo({ camera, viewProjectionMatrix, domElementSize, callb
     })
   }
 
-  const processedTriangles2 = processedTriangles.map((triangle, triangleIndex) => {
+  const trianglesAfterRemovingInsiders = processedTriangles.map((triangle, triangleIndex) => {
     return {
-      edges: triangle.edges.map(edge => {
+      edges: triangle.edges.map(({ edgeSegments2d, ...rest }) => {
         return {
-          ...edge,
-          edgeSegments: edge.edgeSegments.filter(segment => {
+          ...rest,
+          edgeSegments2d: edgeSegments2d.filter(segment => {
             for (let i = 0; i < processedTriangles.length; i++) {
               if (i === triangleIndex) continue;
 
@@ -203,9 +168,8 @@ export async function algo({ camera, viewProjectionMatrix, domElementSize, callb
                 )
               }
 
-
               if (isInTriangle(segment[0]) && isInTriangle(segment[1])) {
-                const segmentMid = edge.start.clone().add(edge.end).divideScalar(2);
+                const segmentMid = rest.start.clone().add(rest.end).divideScalar(2);
                 const triangleMid = triangle.edges[0].start.clone().add(triangle.edges[1].start).add(triangle.edges[2].start).divideScalar(3);
                 const segmentMidCameraDistance = segmentMid.clone().project(camera).z;
                 const triangleMidCameraDistance = triangleMid.clone().project(camera).z;
@@ -224,244 +188,8 @@ export async function algo({ camera, viewProjectionMatrix, domElementSize, callb
   })
 
   return {
-    processedTriangleData: processedTriangles2.map(triangle => ({
-      edges: triangle.edges.map(edge => ({
-        ...edge,
-        edgeSegments: edge.edgeSegments.map(segment => segment.map(segmentPoint => projectionToScreen(segmentPoint, domElementSize)))
-      }))
-    })),
-    debugLines: debugLines.map(segment => segment.map(point => projectionToScreen(point, domElementSize))),
-    debugPoints: debugPoints.map(point => projectionToScreen(point, domElementSize)),
-  };
-}
-
-export function segmentIntersection(A: THREE.Vector2, B: THREE.Vector2, C: THREE.Vector2, D: THREE.Vector2, epsilon = 1e-6) {
-  function det(a: THREE.Vector2, b: THREE.Vector2) {
-    return a.x * b.y - a.y * b.x;
+    processedTriangleData: trianglesAfterRemovingInsiders,
+    debugLines,
+    debugPoints
   }
-
-  const r = new THREE.Vector2().subVectors(B, A);
-  const s = new THREE.Vector2().subVectors(D, C);
-  const diff = new THREE.Vector2().subVectors(C, A);
-
-  const rxs = det(r, s);
-  const qpxr = det(diff, r);
-
-  // Parallel
-  if (Math.abs(rxs) < epsilon) {
-
-    // Collinear
-    if (Math.abs(qpxr) < epsilon) {
-
-      const rdotr = r.dot(r);
-      const t0 = diff.dot(r) / rdotr;
-      const t1 = t0 + s.dot(r) / rdotr;
-
-      // Overlap test
-      if (
-        (t0 >= 0 && t0 <= 1) ||
-        (t1 >= 0 && t1 <= 1) ||
-        (t0 < 0 && t1 > 1) ||
-        (t1 < 0 && t0 > 1)
-      ) {
-        // return midpoint of overlap (simple choice)
-        return null
-        // const t = Math.max(0, Math.min(1, (t0 + t1) * 0.5));
-        // return new THREE.Vector2(
-        //   A.x + r.x * t,
-        //   A.y + r.y * t,
-        // );
-      }
-
-      return null;
-    }
-
-    // Parallel non-intersecting
-    return null;
-  }
-
-  const t = det(diff, s) / rxs;
-  const u = det(diff, r) / rxs;
-
-  if (
-    t >= -epsilon && t <= 1 + epsilon &&
-    u >= -epsilon && u <= 1 + epsilon
-  ) {
-    return new THREE.Vector2(
-      A.x + t * r.x,
-      A.y + t * r.y,
-    );
-  }
-
-  return null;
-}
-
-export function pointSideOfSegment(A: THREE.Vector2, B: THREE.Vector2, P: THREE.Vector2) {
-  const cross =
-    (B.x - A.x) * (P.y - A.y) -
-    (B.y - A.y) * (P.x - A.x);
-
-  if (cross > 0) return "left";
-  if (cross < 0) return "right";
-  return "collinear";
-}
-
-export function sortTriangle(source: ProcessedTriangleData): ProcessedTriangleData {
-  const [a, b, c] = source.edges.map(e => e.edgeSegments[0][0]);
-
-  const cross = (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);
-
-  if (cross > 0) {
-    // Deep clone manually (preserves Vector2/Vector3)
-    const clone = copyTriangleData(source);
-
-    // Flip all edges
-    for (let i = 0; i < 3; i++) {
-      [clone.edges[i].start, clone.edges[i].end] = [clone.edges[i].end, clone.edges[i].start];
-      [clone.edges[i].edgeSegments[0][0], clone.edges[i].edgeSegments[0][1]] =
-        [clone.edges[i].edgeSegments[0][1], clone.edges[i].edgeSegments[0][0]];
-    }
-
-    // Swap edge order
-    [clone.edges[1], clone.edges[2]] = [clone.edges[2], clone.edges[1]];
-
-    return clone;
-  }
-
-  return source;
-}
-
-export function pointInTriangle(
-  pt: THREE.Vector2,
-  v1: THREE.Vector2,
-  v2: THREE.Vector2,
-  v3: THREE.Vector2
-): boolean {
-
-  function sign(p1: THREE.Vector2, p2: THREE.Vector2, p3: THREE.Vector2) {
-    return (p1.x - p3.x) * (p2.y - p3.y) -
-      (p2.x - p3.x) * (p1.y - p3.y);
-  }
-
-  const d1 = sign(pt, v1, v2);
-  const d2 = sign(pt, v2, v3);
-  const d3 = sign(pt, v3, v1);
-
-  const hasNeg = (d1 < 0) || (d2 < 0) || (d3 < 0);
-  const hasPos = (d1 > 0) || (d2 > 0) || (d3 > 0);
-
-  return !(hasNeg && hasPos);
-}
-
-// function intersectRayWithTriangle(P0: THREE.Vector3, D: THREE.Vector3, A: THREE.Vector3, B: THREE.Vector3, C: THREE.Vector3, eps = 1e-4) {
-//   const AB = B.clone().sub(A);
-//   const AC = C.clone().sub(A);
-//   const N = AB.clone().cross(AC);
-
-//   const denom = N.dot(D);
-
-//   if (Math.abs(denom) < eps) {
-//     throw Error("ROWNLEGOEL")
-//   }
-
-//   const t = N.dot(A.clone().sub(P0)) / denom;
-
-//   const P = P0.clone().add(D.clone().multiplyScalar(t));
-
-//   // barycentric
-//   const v0 = B.clone().sub(A);
-//   const v1 = C.clone().sub(A);
-//   const v2 = P.clone().sub(A);
-
-//   const d00 = v0.dot(v0);
-//   const d01 = v0.dot(v1);
-//   const d11 = v1.dot(v1);
-//   const d20 = v2.dot(v0);
-//   const d21 = v2.dot(v1);
-
-//   const denom2 = d00 * d11 - d01 * d01;
-
-//   const v = (d11 * d20 - d01 * d21) / denom2;
-//   const w = (d00 * d21 - d01 * d20) / denom2;
-//   const u = 1 - v - w;
-
-//   if (u >= -eps && v >= -eps && w >= -eps) {
-//     return P; // trafienie (z tolerancją)
-//   }
-
-//   return null;
-// }
-
-
-function intersection3d(camera: THREE.Camera, segmentA: [THREE.Vector3, THREE.Vector3], segmentB: [THREE.Vector3, THREE.Vector3]) {
-  const D = new THREE.Vector3();
-  camera.getWorldDirection(D);
-  const z = D.clone().normalize(); // view direction
-
-  // pick any vector not parallel to z
-  const tmp = Math.abs(z.x) > 0.9
-    ? new THREE.Vector3(0, 1, 0)
-    : new THREE.Vector3(1, 0, 0);
-
-  const x = new THREE.Vector3().crossVectors(tmp, z).normalize();
-  const y = new THREE.Vector3().crossVectors(z, x).normalize();
-
-
-  function project(p: THREE.Vector3) {
-    return new THREE.Vector3(
-      p.dot(x),
-      p.dot(y),
-      p.dot(z) // keep depth!
-    );
-  }
-
-  function intersect2D(p: THREE.Vector3, p2: THREE.Vector3, q: THREE.Vector3, q2: THREE.Vector3) {
-    const r = { x: p2.x - p.x, y: p2.y - p.y };
-    const s = { x: q2.x - q.x, y: q2.y - q.y };
-
-    const cross = (a: THREE.Vector2Like, b: THREE.Vector2Like) => a.x * b.y - a.y * b.x;
-
-    const denom = cross(r, s);
-    if (Math.abs(denom) < 1e-8) return null; // parallel
-
-    const t = cross({ x: q.x - p.x, y: q.y - p.y }, s) / denom;
-    const u = cross({ x: q.x - p.x, y: q.y - p.y }, r) / denom;
-
-    if (t >= 0 && t <= 1 && u >= 0 && u <= 1) {
-      return {
-        x: p.x + t * r.x,
-        y: p.y + t * r.y,
-        t,
-        u
-      };
-    }
-
-    return null;
-  }
-
-  const A0p = project(segmentA[0])
-  const A1p = project(segmentA[1])
-  const B0p = project(segmentB[0])
-  const B1p = project(segmentB[1])
-
-  const intersection = (intersect2D(
-    A0p,
-    A1p,
-    B0p,
-    B1p,
-  ))
-  if (!intersection) {
-    return null;
-  } else {
-    const zA = A0p.z + intersection.t * (A1p.z - A0p.z);
-    const zB = B0p.z + intersection.u * (B1p.z - B0p.z);
-    if (Math.abs(zA - zB) < 0.00001) {
-      return null;
-    } else if (zA < zB) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
 }

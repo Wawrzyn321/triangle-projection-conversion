@@ -1,7 +1,10 @@
 import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+
 import { createCamera, createTriangle, createLine, setupControls } from './utils/sceneHelpers';
 import { drawFromSegments } from './utils/canvasHelpers';
+import { projectResultToScreen } from './utils/projectResultToScreen';
+
 import { algo } from './algo';
 import { FIRST_TRIANGLE, SECOND_TRIANGLE, THIRD_TRIANGLE, FIRST_LINE, SECOND_LINE } from './triangles';
 
@@ -89,12 +92,15 @@ function App() {
 
         const data = await algo({
           camera,
-          domElementSize: new THREE.Vector2(renderer.domElement.width, renderer.domElement.height),
           callback: () => Promise.resolve(),
           inputTriangles: TRIANGLES.map(tri => tri.verts),
           viewProjectionMatrix
         });
-        drawFromSegments(canvasRef.current, data)
+
+        const domElementSize = new THREE.Vector2(renderer.domElement.width, renderer.domElement.height);
+        const screenData = projectResultToScreen(data, domElementSize)
+
+        drawFromSegments(canvasRef.current, screenData)
       }}>execute</button>
       <canvas ref={canvasRef} width={WIDTH} height={HEIGHT}></canvas>
     </main>

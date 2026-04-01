@@ -41,7 +41,7 @@ describe('mapInitialTriangles', () => {
     expect(triangle.edges[2].start).toEqual(new THREE.Vector3(...THIRD_VERT))
     expect(triangle.edges[2].end).toEqual(new THREE.Vector3(...FIRST_VERT))
 
-    expect(triangle.edges[0].edgeSegments[0]).toMatchInlineSnapshot(`
+    expect(triangle.edges[0].edgeSegments2d[0]).toMatchInlineSnapshot(`
 Array [
   Vector2 {
     "x": 0,
@@ -54,7 +54,7 @@ Array [
 ]
 `)
 
-    expect(triangle.edges[1].edgeSegments[0]).toMatchInlineSnapshot(`
+    expect(triangle.edges[1].edgeSegments2d[0]).toMatchInlineSnapshot(`
 Array [
   Vector2 {
     "x": 3,
@@ -67,7 +67,7 @@ Array [
 ]
 `)
 
-    expect(triangle.edges[2].edgeSegments[0]).toMatchInlineSnapshot(`
+    expect(triangle.edges[2].edgeSegments2d[0]).toMatchInlineSnapshot(`
 Array [
   Vector2 {
     "x": 0,
@@ -102,7 +102,7 @@ Array [
 
     expect(result).toHaveLength(1);
 
-    expect(result[0].edges[0].edgeSegments[0]).toMatchInlineSnapshot(`
+    expect(result[0].edges[0].edgeSegments2d[0]).toMatchInlineSnapshot(`
 Array [
   Vector2 {
     "x": 0,
@@ -115,7 +115,7 @@ Array [
 ]
 `)
 
-    expect(result[0].edges[1].edgeSegments[0]).toMatchInlineSnapshot(`
+    expect(result[0].edges[1].edgeSegments2d[0]).toMatchInlineSnapshot(`
 Array [
   Vector2 {
     "x": 0,
@@ -128,7 +128,7 @@ Array [
 ]
 `)
 
-    expect(result[0].edges[2].edgeSegments[0]).toMatchInlineSnapshot(`
+    expect(result[0].edges[2].edgeSegments2d[0]).toMatchInlineSnapshot(`
 Array [
   Vector2 {
     "x": 0,
@@ -163,7 +163,7 @@ Array [
 
     expect(result).toHaveLength(1);
 
-    expect(result[0].edges[0].edgeSegments[0]).toMatchInlineSnapshot(`
+    expect(result[0].edges[0].edgeSegments2d[0]).toMatchInlineSnapshot(`
 Array [
   Vector2 {
     "x": 0,
@@ -176,7 +176,7 @@ Array [
 ]
 `)
 
-    expect(result[0].edges[1].edgeSegments[0]).toMatchInlineSnapshot(`
+    expect(result[0].edges[1].edgeSegments2d[0]).toMatchInlineSnapshot(`
 Array [
   Vector2 {
     "x": 2.121320343559643,
@@ -189,7 +189,7 @@ Array [
 ]
 `)
 
-    expect(result[0].edges[2].edgeSegments[0]).toMatchInlineSnapshot(`
+    expect(result[0].edges[2].edgeSegments2d[0]).toMatchInlineSnapshot(`
 Array [
   Vector2 {
     "x": 0,

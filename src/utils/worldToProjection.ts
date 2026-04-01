@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 
-
 export function worldToProjection(
     pos: THREE.Vector3,
     viewProjectionMatrix: THREE.Matrix4

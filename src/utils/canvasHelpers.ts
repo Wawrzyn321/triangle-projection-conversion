@@ -12,7 +12,7 @@ export function drawFromSegments(canvas: HTMLCanvasElement | null, data: AlgoRet
 
     for (const triangle of data.processedTriangleData) {
         for (const edge of triangle.edges) {
-            for (const segment of edge.edgeSegments) {
+            for (const segment of edge.edgeSegments2d) {
                 drawLine(ctx, segment[0], segment[1]);
             }
         }

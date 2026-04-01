@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { ProcessedTriangleData } from './types';
+import { ProcessedTriangleData } from './../types';
 
 
 export function mapInitialTriangles(inputTriangles: number[][], worldToScreenBound: (point: THREE.Vector3) => THREE.Vector2): ProcessedTriangleData[] {
@@ -17,17 +17,17 @@ export function mapInitialTriangles(inputTriangles: number[][], worldToScreenBou
         {
           start: vert1,
           end: vert2,
-          edgeSegments: [[vert1_2d, vert2_2d]],
+          edgeSegments2d: [[vert1_2d, vert2_2d]],
         },
         {
           start: vert2,
           end: vert3,
-          edgeSegments: [[vert2_2d, vert3_2d]],
+          edgeSegments2d: [[vert2_2d, vert3_2d]],
         },
         {
           start: vert3,
           end: vert1,
-          edgeSegments: [[vert3_2d, vert1_2d]]
+          edgeSegments2d: [[vert3_2d, vert1_2d]]
         }
       ]
     }

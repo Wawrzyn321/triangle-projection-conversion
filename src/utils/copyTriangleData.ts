@@ -6,7 +6,7 @@ export function copyTriangleData(source: ProcessedTriangleData): ProcessedTriang
     edges: source.edges.map(edge => ({
       start: edge.start.clone(),
       end: edge.end.clone(),
-      edgeSegments: edge.edgeSegments.map(segment => segment.map(v => v.clone())
+      edgeSegments2d: edge.edgeSegments2d.map(segment => segment.map(v => v.clone())
       )
     }))
   };

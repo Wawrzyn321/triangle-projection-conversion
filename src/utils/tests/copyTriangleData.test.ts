@@ -11,7 +11,7 @@ const makeTriangle = () => {
             {
                 start: vert1,
                 end: vert2,
-                edgeSegments: [[new THREE.Vector2(0, 0), new THREE.Vector2(3, 0)]],
+                edgeSegments2d: [[new THREE.Vector2(0, 0), new THREE.Vector2(3, 0)]],
             }
         ]
     }
@@ -37,11 +37,11 @@ describe('copyTriangleData', () => {
         for (let i = 0; i < triangle.edges.length; i++) {
             expect(triangle.edges[i].start).not.toBe(copy.edges[i].start)
             expect(triangle.edges[i].end).not.toBe(copy.edges[i].end)
-            expect(triangle.edges[i].edgeSegments).not.toBe(copy.edges[i].edgeSegments)
-            for (let j = 0; j < triangle.edges[i].edgeSegments.length; j++) {
-                expect(triangle.edges[i].edgeSegments[j]).not.toBe(copy.edges[i].edgeSegments[j])
-                for (let k = 0; k < triangle.edges[i].edgeSegments[j].length; k++) {
-                    expect(triangle.edges[i].edgeSegments[j][k]).not.toBe(copy.edges[i].edgeSegments[j][k])
+            expect(triangle.edges[i].edgeSegments2d).not.toBe(copy.edges[i].edgeSegments2d)
+            for (let j = 0; j < triangle.edges[i].edgeSegments2d.length; j++) {
+                expect(triangle.edges[i].edgeSegments2d[j]).not.toBe(copy.edges[i].edgeSegments2d[j])
+                for (let k = 0; k < triangle.edges[i].edgeSegments2d[j].length; k++) {
+                    expect(triangle.edges[i].edgeSegments2d[j][k]).not.toBe(copy.edges[i].edgeSegments2d[j][k])
                 }
             }
         }
