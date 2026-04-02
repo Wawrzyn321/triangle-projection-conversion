@@ -8,7 +8,7 @@ export function projectResultToScreen(algoReturn: AlgoReturn, domElementSize: TH
   };
 
   return {
-    processedTriangleData: algoReturn.processedTriangleData.map(triangle => ({
+    triangles: algoReturn.triangles.map(triangle => ({
       edges: triangle.edges.map(({ edgeSegments2d, ...rest }) => ({
         ...rest,
         edgeSegments2d: edgeSegments2d.map(segment => segment.map(projectionToScreenBound))

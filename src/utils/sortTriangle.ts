@@ -1,8 +1,8 @@
-import { ProcessedTriangleData } from './../types';
+import { TriangleData } from './../types';
 import { copyTriangleData } from './copyTriangleData';
 
 
-export function sortTriangle(source: ProcessedTriangleData): ProcessedTriangleData {
+export function sortTriangle(source: TriangleData): TriangleData {
   const [a, b, c] = source.edges.map(e => e.edgeSegments2d[0][0]);
 
   const cross = (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);

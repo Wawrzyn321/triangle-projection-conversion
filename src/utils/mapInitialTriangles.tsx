@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { ProcessedTriangleData } from './../types';
+import { TriangleData } from './../types';
 
 
-export function mapInitialTriangles(inputTriangles: number[][], worldToScreenBound: (point: THREE.Vector3) => THREE.Vector2): ProcessedTriangleData[] {
+export function mapInitialTriangles(inputTriangles: number[][], worldToScreenBound: (point: THREE.Vector3) => THREE.Vector2): TriangleData[] {
   return inputTriangles.map(triangle => {
     const vert1 = new THREE.Vector3(triangle[0], triangle[1], triangle[2]);
     const vert2 = new THREE.Vector3(triangle[3], triangle[4], triangle[5]);

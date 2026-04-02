@@ -3,10 +3,6 @@ import { worldToProjection } from '../worldToProjection';
 import * as THREE from 'three';
 import { frontCameraMatrix, rightCameraMatrix, skosCameraMatrix } from "./testutils";
 
-jest.mock('three/examples/jsm/controls/OrbitControls.js', () => ({
-  OrbitControls: jest.fn(),
-}));
-
 describe('mapInitialTriangles', () => {
   it('front', () => {
     const FIRST_VERT = [0, 0, 0];

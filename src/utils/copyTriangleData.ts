@@ -1,7 +1,7 @@
-import { ProcessedTriangleData } from '../types';
+import { TriangleData } from '../types';
 
 
-export function copyTriangleData(source: ProcessedTriangleData): ProcessedTriangleData {
+export function copyTriangleData(source: TriangleData): TriangleData {
   return {
     edges: source.edges.map(edge => ({
       start: edge.start.clone(),

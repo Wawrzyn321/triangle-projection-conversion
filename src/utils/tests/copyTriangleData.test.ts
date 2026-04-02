@@ -1,12 +1,12 @@
 import * as THREE from 'three';
-import { ProcessedTriangleData } from "../../types"
+import { TriangleData } from "../../types"
 import { copyTriangleData } from '../copyTriangleData';
 
 const makeTriangle = () => {
     const vert1 = new THREE.Vector3(0, 0, 0);
     const vert2 = new THREE.Vector3(3, 0, 0);
 
-    const triangle: ProcessedTriangleData = {
+    const triangle: TriangleData = {
         edges: [
             {
                 start: vert1,

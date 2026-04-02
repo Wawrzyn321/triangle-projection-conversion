@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { ProcessedTriangleData } from './../types';
+import { TriangleData } from './../types';
 import { pointInTriangle } from './../utils/pointInTriangle';
 
-export function removeInnerTriangles(p_triangles: ProcessedTriangleData[]) {
+export function removeInnerTriangles(p_triangles: TriangleData[]) {
   return p_triangles
     .filter((triangle, triangleIndex) => {
       for (let otherIndex = 0; otherIndex < p_triangles.length; otherIndex++) {

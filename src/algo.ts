@@ -1,11 +1,9 @@
 import * as THREE from 'three';
-import { projectionToScreen } from './utils/projectionToScreen';
 import { worldToProjection } from './utils/worldToProjection';
-import { ProcessedTriangleData, AlgoReturn, Segment2d } from './types';
+import { TriangleData, AlgoReturn, Segment2d } from './types';
 import { mapInitialTriangles } from './utils/mapInitialTriangles';
 import { copyTriangleData } from './utils/copyTriangleData';
 import { pointSideOfSegment } from './utils/pointSideOfSegment';
-import { pointInTriangle } from './utils/pointInTriangle';
 import { segmentIntersection } from './utils/segmentIntersection';
 import { sortTriangle } from './utils/sortTriangle';
 
@@ -21,9 +19,9 @@ export async function algo({ camera, viewProjectionMatrix, callback, inputTriang
     return worldToProjection(point, viewProjectionMatrix)
   }
 
-  const triangles: ProcessedTriangleData[] = mapInitialTriangles(inputTriangles, worldToProjectionBound);
+  const triangles: TriangleData[] = mapInitialTriangles(inputTriangles, worldToProjectionBound);
 
-  let processedTriangles: ProcessedTriangleData[] = [];
+  let processedTriangles: TriangleData[] = [];
   const debugLines: Segment2d[] = [];
   const debugPoints: THREE.Vector2[] = [];
 
@@ -32,7 +30,7 @@ export async function algo({ camera, viewProjectionMatrix, callback, inputTriang
     const currentTriangle = Object.freeze(TEMP);
     const CURRENT_TRIANGLE_NEW_DATA = copyTriangleData(TEMP)
 
-    const nextProcessedTriangles: ProcessedTriangleData[] = []
+    const nextProcessedTriangles: TriangleData[] = []
 
     for (const otherTriangle of processedTriangles) {
       const OTHER_TRIANGLE_NEW_DATA = copyTriangleData(otherTriangle);
@@ -50,7 +48,7 @@ export async function algo({ camera, viewProjectionMatrix, callback, inputTriang
             const newSegmentsForOtherTriangle: Segment2d[] = [];
             for (const otherTriangleEdgeSegment of otherTriangleEdge.edgeSegments2d) {
               await callback({
-                processedTriangleData: processedTriangles,
+                triangles: processedTriangles,
                 debugLines: [
                   otherTriangleEdgeSegment,
                   currentTriangleEdgeSegment,
@@ -134,7 +132,7 @@ export async function algo({ camera, viewProjectionMatrix, callback, inputTriang
       }
       nextProcessedTriangles.push(OTHER_TRIANGLE_NEW_DATA);
       await callback({
-        processedTriangleData: processedTriangles,
+        triangles: processedTriangles,
         debugLines,
         debugPoints,
       })
@@ -142,53 +140,14 @@ export async function algo({ camera, viewProjectionMatrix, callback, inputTriang
 
     processedTriangles = [...nextProcessedTriangles, CURRENT_TRIANGLE_NEW_DATA]
     await callback({
-      processedTriangleData: processedTriangles,
+      triangles: processedTriangles,
       debugLines,
       debugPoints,
     })
   }
 
-  const trianglesAfterRemovingInsiders = processedTriangles.map((triangle, triangleIndex) => {
-    return {
-      edges: triangle.edges.map(({ edgeSegments2d, ...rest }) => {
-        return {
-          ...rest,
-          edgeSegments2d: edgeSegments2d.filter(segment => {
-            for (let i = 0; i < processedTriangles.length; i++) {
-              if (i === triangleIndex) continue;
-
-              const otherTriangle = processedTriangles[i];
-
-              const isInTriangle = (point: THREE.Vector2) => {
-                return pointInTriangle(
-                  point,
-                  worldToProjectionBound(otherTriangle.edges[0].start),
-                  worldToProjectionBound(otherTriangle.edges[1].start),
-                  worldToProjectionBound(otherTriangle.edges[2].start),
-                )
-              }
-
-              if (isInTriangle(segment[0]) && isInTriangle(segment[1])) {
-                const segmentMid = rest.start.clone().add(rest.end).divideScalar(2);
-                const triangleMid = triangle.edges[0].start.clone().add(triangle.edges[1].start).add(triangle.edges[2].start).divideScalar(3);
-                const segmentMidCameraDistance = segmentMid.clone().project(camera).z;
-                const triangleMidCameraDistance = triangleMid.clone().project(camera).z;
-
-                if (segmentMidCameraDistance > triangleMidCameraDistance) {
-                  debugLines.push(segment);
-                  return false;
-                }
-              }
-            }
-            return true;
-          })
-        }
-      })
-    }
-  })
-
   return {
-    processedTriangleData: trianglesAfterRemovingInsiders,
+    triangles: processedTriangles,
     debugLines,
     debugPoints
   }
