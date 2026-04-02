@@ -19,5 +19,19 @@ describe('segmentIntersection', () => {
             new THREE.Vector2(2, 0),
             new THREE.Vector2(3, 0),
         )).toBe(null);
+
+        expect(segmentIntersection(
+            new THREE.Vector2(-1, -1),
+            new THREE.Vector2(1, 1),
+            new THREE.Vector2(-5, -5),
+            new THREE.Vector2(5, 5),
+        )).toBe(null);
+
+        expect(segmentIntersection(
+            new THREE.Vector2(-1, -1),
+            new THREE.Vector2(1, 1),
+            new THREE.Vector2(-2, -2),
+            new THREE.Vector2(3, 3),
+        )).toBe(null);
     })
 })
