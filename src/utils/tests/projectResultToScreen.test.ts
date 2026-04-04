@@ -3,31 +3,41 @@ import { AlgoReturn } from "../../types";
 import { projectResultToScreen } from "../projectResultToScreen";
 
 describe('projectResultToScreen', () => {
-    it('projects', () => {
-        const algoReturn: AlgoReturn = {
-            debugLines: [[new THREE.Vector2(0, 0), new THREE.Vector2(5, 5)]],
-            debugPoints: [new THREE.Vector2(1, 1)],
-            triangles: [{
-                edges: [{
-                    start: new THREE.Vector3(1,1,1),
-                    end: new THREE.Vector3(2,2,2),
-                    edgeSegments2d: [
-                        [
-                            new THREE.Vector2(1,1),
-                            new THREE.Vector2(0.5,0.5),
-                        ],
-                        [
-                            new THREE.Vector2(1.5,1.5),
-                            new THREE.Vector2(2,2),
-                        ]
-                    ]
-                }]
-            }]
-        }
+  it('projects', () => {
+    const algoReturn: AlgoReturn = {
+      debugLines: [[new THREE.Vector2(0, 0), new THREE.Vector2(5, 5)]],
+      debugPoints: [new THREE.Vector2(1, 1)],
+      triangles: [{
+        edges: [{
+          start: new THREE.Vector3(1, 1, 1),
+          end: new THREE.Vector3(2, 2, 2),
+          edgeSegments2d: [
+            [
+              new THREE.Vector2(1, 1),
+              new THREE.Vector2(0.5, 0.5),
+            ],
+            [
+              new THREE.Vector2(1.5, 1.5),
+              new THREE.Vector2(2, 2),
+            ]
+          ],
+          edgeSegments3d: [
+            [
+              new THREE.Vector3(1, 1, 1),
+              new THREE.Vector3(0.5, 0.5, 1),
+            ],
+            [
+              new THREE.Vector3(1.5, 1.5, 2),
+              new THREE.Vector3(2, 2, 2),
+            ]
+          ]
+        }]
+      }]
+    }
 
-        const result = projectResultToScreen(algoReturn, new THREE.Vector2(10, 10));
+    const result = projectResultToScreen(algoReturn, new THREE.Vector2(10, 10));
 
-        expect(result.debugLines).toMatchInlineSnapshot(`
+    expect(result.debugLines).toMatchInlineSnapshot(`
 Array [
   Array [
     Vector2 {
@@ -41,7 +51,7 @@ Array [
   ],
 ]
 `);
-        expect(result.debugPoints).toMatchInlineSnapshot(`
+    expect(result.debugPoints).toMatchInlineSnapshot(`
 Array [
   Vector2 {
     "x": 10,
@@ -49,7 +59,7 @@ Array [
   },
 ]
 `);
-        expect(result.triangles).toMatchInlineSnapshot(`
+    expect(result.triangles).toMatchInlineSnapshot(`
 Array [
   Object {
     "edges": Array [
@@ -76,6 +86,32 @@ Array [
             },
           ],
         ],
+        "edgeSegments3d": Array [
+          Array [
+            Vector3 {
+              "x": 1,
+              "y": 1,
+              "z": 1,
+            },
+            Vector3 {
+              "x": 0.5,
+              "y": 0.5,
+              "z": 1,
+            },
+          ],
+          Array [
+            Vector3 {
+              "x": 1.5,
+              "y": 1.5,
+              "z": 2,
+            },
+            Vector3 {
+              "x": 2,
+              "y": 2,
+              "z": 2,
+            },
+          ],
+        ],
         "end": Vector3 {
           "x": 2,
           "y": 2,
@@ -91,5 +127,5 @@ Array [
   },
 ]
 `);
-    })
+  })
 })

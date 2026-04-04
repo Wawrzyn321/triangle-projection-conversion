@@ -18,16 +18,19 @@ export function mapInitialTriangles(inputTriangles: number[][], worldToScreenBou
           start: vert1,
           end: vert2,
           edgeSegments2d: [[vert1_2d, vert2_2d]],
+          edgeSegments3d: [[vert1, vert2]],
         },
         {
           start: vert2,
           end: vert3,
           edgeSegments2d: [[vert2_2d, vert3_2d]],
+          edgeSegments3d: [[vert2, vert3]],
         },
         {
           start: vert3,
           end: vert1,
-          edgeSegments2d: [[vert3_2d, vert1_2d]]
+          edgeSegments2d: [[vert3_2d, vert1_2d]],
+          edgeSegments3d: [[vert3, vert1]],
         }
       ]
     }

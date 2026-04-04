@@ -1,20 +1,21 @@
 import * as THREE from 'three';
 import { worldToProjection } from './utils/worldToProjection';
-import { TriangleData, AlgoReturn, Segment2d } from './types';
+import { TriangleData, AlgoReturn, Segment2d, Segment3d } from './types';
 import { mapInitialTriangles } from './utils/mapInitialTriangles';
 import { copyTriangleData } from './utils/copyTriangleData';
 import { pointSideOfSegment } from './utils/pointSideOfSegment';
 import { segmentIntersection } from './utils/segmentIntersection';
 import { sortTriangle } from './utils/sortTriangle';
+import { buildProjectionLineFromMatrix } from './buildProjectionLineFromMatrix';
+import { intersectProjectionLineWithSegment } from './intersectProjectionLineWithSegment';
+import { isCloserToCamera } from './utils/isCloserToCamera';
 
 type Args = {
-  camera: THREE.Camera,
   viewProjectionMatrix: THREE.Matrix4;
-  callback: (data: AlgoReturn) => Promise<void>
   inputTriangles: number[][]
 }
 
-export async function algo({ camera, viewProjectionMatrix, callback, inputTriangles }: Args): Promise<AlgoReturn> {
+export function algo({ viewProjectionMatrix, inputTriangles }: Args): AlgoReturn {
   const worldToProjectionBound = (point: THREE.Vector3) => {
     return worldToProjection(point, viewProjectionMatrix)
   }
@@ -24,6 +25,7 @@ export async function algo({ camera, viewProjectionMatrix, callback, inputTriang
   let processedTriangles: TriangleData[] = [];
   const debugLines: Segment2d[] = [];
   const debugPoints: THREE.Vector2[] = [];
+  const debugSpheres: THREE.Vector3[] = [];
 
   for (const triangle of triangles) {
     const TEMP = sortTriangle(triangle);
@@ -38,24 +40,21 @@ export async function algo({ camera, viewProjectionMatrix, callback, inputTriang
       // intersections for other triangle
       console.assert(currentTriangle.edges.length === 3);
       for (let currentTriangleEdgeIndex = 0; currentTriangleEdgeIndex < 3; currentTriangleEdgeIndex++) {
-        const newSegmentsForCurrentTriangle: Segment2d[] = [];
+        const newSegments2dForCurrentTriangle: Segment2d[] = [];
+        const newSegments3dForCurrentTriangle: Segment3d[] = [];
 
         const currentTriangleEdge = currentTriangle.edges[currentTriangleEdgeIndex];
-        for (const currentTriangleEdgeSegment of currentTriangleEdge.edgeSegments2d) {
+        for (let currentTriangleEdgeSegmentIndex = 0; currentTriangleEdgeSegmentIndex < currentTriangleEdge.edgeSegments2d.length; currentTriangleEdgeSegmentIndex++) {
+          const currentTriangleEdgeSegment = currentTriangleEdge.edgeSegments2d[currentTriangleEdgeSegmentIndex];
+          const currentTriangleEdgeSegment3d = currentTriangleEdge.edgeSegments3d[currentTriangleEdgeSegmentIndex];
           console.assert(otherTriangle.edges.length === 3);
           for (let otherTriangleEdgeIndex = 0; otherTriangleEdgeIndex < 3; otherTriangleEdgeIndex++) {
             const otherTriangleEdge = otherTriangle.edges[otherTriangleEdgeIndex];
-            const newSegmentsForOtherTriangle: Segment2d[] = [];
-            for (const otherTriangleEdgeSegment of otherTriangleEdge.edgeSegments2d) {
-              await callback({
-                triangles: processedTriangles,
-                debugLines: [
-                  otherTriangleEdgeSegment,
-                  currentTriangleEdgeSegment,
-                ],
-                debugPoints,
-              })
-
+            const newSegments2dForOtherTriangle: Segment2d[] = [];
+            const newSegments3dForOtherTriangle: Segment3d[] = [];
+            for (let otherTriangleEdgeSegmentIndex = 0; otherTriangleEdgeSegmentIndex < otherTriangleEdge.edgeSegments2d.length; otherTriangleEdgeSegmentIndex++) {
+              const otherTriangleEdgeSegment = otherTriangleEdge.edgeSegments2d[otherTriangleEdgeSegmentIndex];
+              const otherTriangleEdgeSegment3d = otherTriangleEdge.edgeSegments3d[otherTriangleEdgeSegmentIndex];
 
               const intersectionPoint = segmentIntersection(
                 currentTriangleEdgeSegment[0],
@@ -66,29 +65,40 @@ export async function algo({ camera, viewProjectionMatrix, callback, inputTriang
               if (intersectionPoint) {
                 debugPoints.push(intersectionPoint);
 
-                const midCurrentTriangleEdge = currentTriangleEdge.start.clone().add(currentTriangleEdge.end).divideScalar(2);
-                const midOtherTriangleEdge = otherTriangleEdge.start.clone().add(otherTriangleEdge.end).divideScalar(2);
-                const midCurrentTriangleEdgeCameraDistance2 = midCurrentTriangleEdge.clone().project(camera).z;
-                const midOtherTriangleEdgeCameraDistance2 = midOtherTriangleEdge.clone().project(camera).z;
-                let currentIsCloser = midCurrentTriangleEdgeCameraDistance2 < midOtherTriangleEdgeCameraDistance2;
+                const projectionLine = buildProjectionLineFromMatrix(
+                  intersectionPoint,
+                  viewProjectionMatrix
+                );
+                const currentEdgePoint = intersectProjectionLineWithSegment(projectionLine.origin, projectionLine.direction, currentTriangleEdgeSegment3d);
+                const otherEdgePoint = intersectProjectionLineWithSegment(projectionLine.origin, projectionLine.direction, otherTriangleEdgeSegment3d);
+
+                const currentIsCloser = isCloserToCamera(currentEdgePoint, otherEdgePoint, viewProjectionMatrix)
 
                 if (currentIsCloser) {
                   const otherTrianglePointASide = pointSideOfSegment(currentTriangleEdgeSegment[0], currentTriangleEdgeSegment[1], otherTriangleEdgeSegment[0]);
                   const otherTrianglePointBSide = pointSideOfSegment(currentTriangleEdgeSegment[0], currentTriangleEdgeSegment[1], otherTriangleEdgeSegment[1]);
                   if (otherTrianglePointASide === otherTrianglePointBSide) {
-                    throw Error("same")
+                    // console.log("same")
                   } else {
                     if (otherTrianglePointASide === 'left') {
                       debugPoints.push(otherTriangleEdgeSegment[0]);
-                      newSegmentsForOtherTriangle.push([
+                      newSegments2dForOtherTriangle.push([
                         otherTriangleEdgeSegment[0],
                         intersectionPoint,
                       ]);
+                      newSegments3dForOtherTriangle.push([
+                        otherTriangleEdgeSegment3d[1],
+                        otherEdgePoint
+                      ])
                     } else {
                       debugPoints.push(otherTriangleEdgeSegment[1]);
-                      newSegmentsForOtherTriangle.push([
+                      newSegments2dForOtherTriangle.push([
                         intersectionPoint,
                         otherTriangleEdgeSegment[1],
+                      ]);
+                      newSegments3dForOtherTriangle.push([
+                        otherEdgePoint,
+                        otherTriangleEdgeSegment3d[1],
                       ]);
                     }
                   }
@@ -96,19 +106,27 @@ export async function algo({ camera, viewProjectionMatrix, callback, inputTriang
                   const currentTrianglePoint0Side = pointSideOfSegment(otherTriangleEdgeSegment[0], otherTriangleEdgeSegment[1], currentTriangleEdgeSegment[0]);
                   const currentTrianglePoint1Side = pointSideOfSegment(otherTriangleEdgeSegment[0], otherTriangleEdgeSegment[1], currentTriangleEdgeSegment[1]);
                   if (currentTrianglePoint0Side === currentTrianglePoint1Side) {
-                    throw Error("same")
+                    // console.log("same")
                   } else {
                     if (currentTrianglePoint0Side === 'left') {
                       debugPoints.push(currentTriangleEdgeSegment[0]);
-                      newSegmentsForCurrentTriangle.push([
+                      newSegments2dForCurrentTriangle.push([
                         currentTriangleEdgeSegment[0],
                         intersectionPoint,
                       ]);
+                      newSegments3dForCurrentTriangle.push([
+                        currentTriangleEdgeSegment3d[0],
+                        currentEdgePoint,
+                      ]);
                     } else {
                       debugPoints.push(currentTriangleEdgeSegment[1]);
-                      newSegmentsForCurrentTriangle.push([
+                      newSegments2dForCurrentTriangle.push([
                         intersectionPoint,
                         currentTriangleEdgeSegment[1],
+                      ]);
+                      newSegments3dForCurrentTriangle.push([
+                        currentEdgePoint,
+                        currentTriangleEdgeSegment3d[1],
                       ]);
                     }
                   }
@@ -116,39 +134,35 @@ export async function algo({ camera, viewProjectionMatrix, callback, inputTriang
               }
             }
 
-            if (newSegmentsForOtherTriangle.length) {
+            console.assert(newSegments2dForOtherTriangle.length === newSegments3dForOtherTriangle.length)
+
+            if (newSegments2dForOtherTriangle.length) {
               if (!touched[otherTriangleEdgeIndex]) {
-                OTHER_TRIANGLE_NEW_DATA.edges[otherTriangleEdgeIndex].edgeSegments2d = newSegmentsForOtherTriangle;
+                OTHER_TRIANGLE_NEW_DATA.edges[otherTriangleEdgeIndex].edgeSegments2d = newSegments2dForOtherTriangle;
+                OTHER_TRIANGLE_NEW_DATA.edges[otherTriangleEdgeIndex].edgeSegments3d = newSegments3dForOtherTriangle;
                 touched[otherTriangleEdgeIndex] = true;
               } else {
-                OTHER_TRIANGLE_NEW_DATA.edges[otherTriangleEdgeIndex].edgeSegments2d.push(...newSegmentsForOtherTriangle);
+                OTHER_TRIANGLE_NEW_DATA.edges[otherTriangleEdgeIndex].edgeSegments2d.push(...newSegments2dForOtherTriangle);
+                OTHER_TRIANGLE_NEW_DATA.edges[otherTriangleEdgeIndex].edgeSegments3d.push(...newSegments3dForOtherTriangle);
               }
             }
           }
         }
-        if (newSegmentsForCurrentTriangle.length) {
-          CURRENT_TRIANGLE_NEW_DATA.edges[currentTriangleEdgeIndex].edgeSegments2d = newSegmentsForCurrentTriangle;
+        if (newSegments2dForCurrentTriangle.length) {
+          CURRENT_TRIANGLE_NEW_DATA.edges[currentTriangleEdgeIndex].edgeSegments2d = newSegments2dForCurrentTriangle;
+          CURRENT_TRIANGLE_NEW_DATA.edges[currentTriangleEdgeIndex].edgeSegments3d = newSegments3dForCurrentTriangle;
         }
       }
       nextProcessedTriangles.push(OTHER_TRIANGLE_NEW_DATA);
-      await callback({
-        triangles: processedTriangles,
-        debugLines,
-        debugPoints,
-      })
     }
 
     processedTriangles = [...nextProcessedTriangles, CURRENT_TRIANGLE_NEW_DATA]
-    await callback({
-      triangles: processedTriangles,
-      debugLines,
-      debugPoints,
-    })
   }
 
   return {
     triangles: processedTriangles,
     debugLines,
-    debugPoints
+    debugPoints,
+    // debugSpheres,
   }
 }

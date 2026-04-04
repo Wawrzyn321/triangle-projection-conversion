@@ -16,6 +16,7 @@ export function projectResultToScreen(algoReturn: AlgoReturn, domElementSize: TH
     })),
     debugLines: algoReturn.debugLines.map(segment => segment.map(projectionToScreenBound)),
     debugPoints: algoReturn.debugPoints.map(projectionToScreenBound),
+    // debugSpheres: algoReturn.debugSpheres
   };
 
 }

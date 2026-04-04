@@ -44,10 +44,10 @@ describe('line', () => {
         expect(projectionLine.origin.y).toBeCloseTo(0);
         expect(projectionLine.origin.z).toBe(-1);
 
-        const line1Point = intersectProjectionLineWithSegment(projectionLine.origin, projectionLine.direction, line1[0], line1[1]);
+        const line1Point = intersectProjectionLineWithSegment(projectionLine.origin, projectionLine.direction, line1);
         expect(line1Point).toEqual(new THREE.Vector3(0, 0, 2500))
 
-        const line2Point = intersectProjectionLineWithSegment(projectionLine.origin, projectionLine.direction, line2[0], line2[1]);
+        const line2Point = intersectProjectionLineWithSegment(projectionLine.origin, projectionLine.direction, line2);
         expect(line2Point).toEqual(new THREE.Vector3(0, 0, 0))
     })
 
@@ -87,7 +87,7 @@ describe('line', () => {
         expect(projectionLine.origin.y).toBeCloseTo(1.4 / 5);
         expect(projectionLine.origin.z).toBe(-1);
 
-        const line1Point = intersectProjectionLineWithSegment(projectionLine.origin, projectionLine.direction, line1[0], line1[1]);
+        const line1Point = intersectProjectionLineWithSegment(projectionLine.origin, projectionLine.direction, line1);
         expect(line1Point).toMatchInlineSnapshot(`
 Vector3 {
   "x": 0.2800000000000001,
@@ -96,7 +96,7 @@ Vector3 {
 }
 `);
 
-        const line2Point = intersectProjectionLineWithSegment(projectionLine.origin, projectionLine.direction, line2[0], line2[1]);
+        const line2Point = intersectProjectionLineWithSegment(projectionLine.origin, projectionLine.direction, line2);
         expect(line2Point).toMatchInlineSnapshot(`
 Vector3 {
   "x": 0.2800000000000001,

@@ -12,6 +12,7 @@ const makeTriangle = () => {
                 start: vert1,
                 end: vert2,
                 edgeSegments2d: [[new THREE.Vector2(0, 0), new THREE.Vector2(3, 0)]],
+                edgeSegments3d: [[vert1, vert2]],
             }
         ]
     }
@@ -42,6 +43,7 @@ describe('copyTriangleData', () => {
                 expect(triangle.edges[i].edgeSegments2d[j]).not.toBe(copy.edges[i].edgeSegments2d[j])
                 for (let k = 0; k < triangle.edges[i].edgeSegments2d[j].length; k++) {
                     expect(triangle.edges[i].edgeSegments2d[j][k]).not.toBe(copy.edges[i].edgeSegments2d[j][k])
+                    expect(triangle.edges[i].edgeSegments3d[j][k]).not.toBe(copy.edges[i].edgeSegments3d[j][k])
                 }
             }
         }

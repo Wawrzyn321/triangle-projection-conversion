@@ -16,6 +16,8 @@ export function sortTriangle(source: TriangleData): TriangleData {
       [clone.edges[i].start, clone.edges[i].end] = [clone.edges[i].end, clone.edges[i].start];
       [clone.edges[i].edgeSegments2d[0][0], clone.edges[i].edgeSegments2d[0][1]] =
         [clone.edges[i].edgeSegments2d[0][1], clone.edges[i].edgeSegments2d[0][0]];
+      [clone.edges[i].edgeSegments3d[0][0], clone.edges[i].edgeSegments3d[0][1]] =
+        [clone.edges[i].edgeSegments3d[0][1], clone.edges[i].edgeSegments3d[0][0]];
     }
 
     // Swap edge order

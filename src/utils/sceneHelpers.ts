@@ -55,3 +55,12 @@ export function createLine(points: [THREE.Vector3, THREE.Vector3], color: number
     const geometry = new THREE.BufferGeometry().setFromPoints(points);
     return new THREE.Line(geometry, material);
 }
+
+export function createSphere(position: THREE.Vector3) {
+    const geometry = new THREE.SphereGeometry(0.1, 32, 16);
+    const material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+    const sphere = new THREE.Mesh(geometry, material);
+    sphere.position.set(position.x, position.y, position.z);
+    return sphere;
+
+}

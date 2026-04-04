@@ -7,6 +7,7 @@ export type TriangleEdge = {
     start: THREE.Vector3;
     end: THREE.Vector3;
     edgeSegments2d: Segment2d[];
+    edgeSegments3d: Segment3d[];
 }
 
 export type TriangleData = {
@@ -17,4 +18,5 @@ export type AlgoReturn = {
     triangles: TriangleData[];
     debugLines: Segment2d[];
     debugPoints: THREE.Vector2[];
+    // debugSpheres: THREE.Vector3[];
 }

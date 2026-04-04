@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { ChangeEvent, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
-import { createCamera, createTriangle, createLine, setupControls } from './utils/sceneHelpers';
+import { createCamera, createTriangle, createLine, setupControls, createSphere } from './utils/sceneHelpers';
 import { drawFromSegments } from './utils/canvasHelpers';
 import { projectResultToScreen } from './utils/projectResultToScreen';
+import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 
 import { algo } from './algo';
 import { FIRST_TRIANGLE, SECOND_TRIANGLE, THIRD_TRIANGLE, FIRST_LINE, SECOND_LINE } from './triangles';
@@ -24,8 +25,9 @@ const TRIANGLES = [{
 
 function App() {
   const rendererRef = useRef<HTMLDivElement | null>(null);
-  const sceneOpts = useRef<{
+  const worldOpts = useRef<{
     camera: THREE.Camera,
+    scene: THREE.Scene,
     renderer: THREE.WebGLRenderer,
   } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -46,24 +48,22 @@ function App() {
 
     TRIANGLES.forEach(triangle => scene.add(createTriangle(triangle.verts, triangle.color)));
 
-    scene.add(createLine(FIRST_LINE, 0x00ff00));
-    scene.add(createLine(SECOND_LINE, 0x008888));
-
     function animate() {
       controls.update();
       renderer.render(scene, camera);
     }
     renderer.setAnimationLoop(animate);
 
-    sceneOpts.current = {
+    worldOpts.current = {
       camera,
       renderer,
+      scene
     }
 
     return () => {
       renderer.dispose();
       rendererTarget.removeChild(renderer.domElement)
-      sceneOpts.current = null;
+      worldOpts.current = null;
       console.log('destroy')
     }
   }, [module.hot])
@@ -81,30 +81,80 @@ function App() {
   //   console.log(intersects);
   // }
 
+  function execute(inputTriangles: number[][]) {
+    const { camera, renderer } = worldOpts.current!
+
+    const viewProjectionMatrix = new THREE.Matrix4()
+      .multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+
+    const data = algo({
+      inputTriangles,
+      viewProjectionMatrix
+    });
+
+
+    const domElementSize = new THREE.Vector2(renderer.domElement.width, renderer.domElement.height);
+    const screenData = projectResultToScreen(data, domElementSize)
+
+    // for (const point of screenData.debugSpheres) {
+    //   sceneOpts.current!.scene.add(createSphere(point));
+    // }
+
+    drawFromSegments(canvasRef.current, screenData)
+  }
+
+  async function executeOnFile(e: ChangeEvent<HTMLInputElement, HTMLInputElement>) {
+    const file = e.target.files![0];
+    const data = await file.arrayBuffer();
+
+    const loader = new STLLoader();
+    // const geometry = await loader.loadAsync('./FPV-Wing-v3.6-Base_Print.stl')
+    const geometry = loader.parse(data)
+    const model = new THREE.Mesh(geometry);
+
+    while (worldOpts.current!.scene.children.length > 0) {
+      worldOpts.current!.scene.remove(worldOpts.current!.scene.children[0]);
+    }
+
+    worldOpts.current!.scene.add(model);
+
+    execute(meshToWorldTriangles(model).map(t => t.flat()));
+  }
+
   return (
     <main>
       <div ref={rendererRef} />
-      <button style={{ display: 'block' }} onClick={async () => {
-        const { camera, renderer } = sceneOpts.current!
-
-        const viewProjectionMatrix = new THREE.Matrix4()
-          .multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
-
-        const data = await algo({
-          camera,
-          callback: () => Promise.resolve(),
-          inputTriangles: TRIANGLES.map(tri => tri.verts),
-          viewProjectionMatrix
-        });
-
-        const domElementSize = new THREE.Vector2(renderer.domElement.width, renderer.domElement.height);
-        const screenData = projectResultToScreen(data, domElementSize)
-
-        drawFromSegments(canvasRef.current, screenData)
-      }}>execute</button>
+      <button style={{ display: 'block' }} onClick={() => execute(TRIANGLES.map(tri => tri.verts))}>execute</button>
+      <input type='file' onChange={executeOnFile} />
       <canvas ref={canvasRef} width={WIDTH} height={HEIGHT}></canvas>
     </main>
   );
 }
 
 export default App;
+
+
+function meshToWorldTriangles(mesh: THREE.Mesh): number[][][] {
+  const geom = mesh.geometry.clone();
+  const nonIndexed = geom.index ? geom.toNonIndexed() : geom;
+  const posAttr = nonIndexed.getAttribute("position") as THREE.BufferAttribute;
+
+  const triangles: number[][][] = [];
+  const v = new THREE.Vector3();
+
+  mesh.updateMatrixWorld(true);
+
+  for (let i = 0; i < posAttr.count; i += 3) {
+    const tri: number[][] = [];
+
+    for (let j = 0; j < 3; j++) {
+      v.set(posAttr.getX(i + j), posAttr.getY(i + j), posAttr.getZ(i + j));
+      v.applyMatrix4(mesh.matrixWorld);
+      tri.push([v.x, v.y, v.z]);
+    }
+
+    triangles.push(tri);
+  }
+
+  return triangles;
+}

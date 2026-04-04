@@ -17,16 +17,19 @@ const clockwiseTriangle: TriangleData = {
             start: vert1,
             end: vert2,
             edgeSegments2d: [[vert1_2d, vert2_2d]],
+            edgeSegments3d: [[vert1, vert2]]
         },
         {
             start: vert2,
             end: vert3,
             edgeSegments2d: [[vert2_2d, vert3_2d]],
+            edgeSegments3d: [[vert2, vert3]]
         },
         {
             start: vert3,
             end: vert1,
-            edgeSegments2d: [[vert3_2d, vert1_2d]]
+            edgeSegments2d: [[vert3_2d, vert1_2d]],
+            edgeSegments3d: [[vert3, vert1]]
         }
     ]
 }
@@ -38,16 +41,19 @@ const counterclockwiseTriangle: TriangleData = {
             start: vert1,
             end: vert3,
             edgeSegments2d: [[vert1_2d, vert3_2d]],
+            edgeSegments3d: [[vert1, vert3]]
         },
         {
             start: vert3,
             end: vert2,
             edgeSegments2d: [[vert3_2d, vert2_2d]],
+            edgeSegments3d: [[vert3, vert2]]
         },
         {
             start: vert2,
             end: vert1,
-            edgeSegments2d: [[vert2_2d, vert1_2d]]
+            edgeSegments2d: [[vert2_2d, vert1_2d]],
+            edgeSegments3d: [[vert2, vert1]]
         }
     ]
 }
@@ -75,6 +81,10 @@ describe('sortTriangle', () => {
             expect(edge.start.y).toEqual(edge.edgeSegments2d[0][0].y)
             expect(edge.end.x).toEqual(edge.edgeSegments2d[0][1].x)
             expect(edge.end.y).toEqual(edge.edgeSegments2d[0][1].y)
+            expect(edge.start.x).toEqual(edge.edgeSegments3d[0][0].x)
+            expect(edge.start.y).toEqual(edge.edgeSegments3d[0][0].y)
+            expect(edge.end.x).toEqual(edge.edgeSegments3d[0][1].x)
+            expect(edge.end.y).toEqual(edge.edgeSegments3d[0][1].y)
         }
 
         const sorted = sortTriangle(counterclockwiseTriangle);

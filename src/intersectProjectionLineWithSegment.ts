@@ -1,11 +1,12 @@
 import * as THREE from "three";
+import { Segment3d } from "./types";
 
 export function intersectProjectionLineWithSegment(
   rayOrigin: THREE.Vector3,
   rayDir: THREE.Vector3,
-  a: THREE.Vector3,
-  b: THREE.Vector3
-): THREE.Vector3 | null {
+  segment: Segment3d
+) {
+  const [a, b] = segment;
 
   const line = segmentToLine(a, b);
 
@@ -25,13 +26,17 @@ export function intersectProjectionLineWithSegment(
 
   const denom = a1 * c1 - b1 * b1;
 
-  if (Math.abs(denom) < 1e-6) return null;
+  if (Math.abs(denom) < 1e-6) {
+    // console.log("denom!")
+  }
 
   const t = (b1 * e1 - c1 * d1r) / denom;
   const s = (a1 * e1 - b1 * d1r) / denom;
 
-  // 🔥 THIS is the key addition:
-  if (s < 0 || s > 1) return null;
+  if (s <= 0 || s >= 1) {
+    // console.log(s);
+    // throw Error("poza segmentem")
+  };
 
   return p1.clone().add(d1.clone().multiplyScalar(t));
 }

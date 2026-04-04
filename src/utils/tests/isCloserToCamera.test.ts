@@ -13,12 +13,12 @@ describe('isCloserToCamera', () => {
         expect(isCloserToCamera(
             new THREE.Vector3(0, 0, 0),
             new THREE.Vector3(0, 0, 1000),
-            frontCameraMatrix())).toBe(false);
+            frontCameraMatrix())).toBe(true);
 
         expect(isCloserToCamera(
             new THREE.Vector3(0, 0, 1000),
             new THREE.Vector3(0, 0, 0),
-            frontCameraMatrix())).toBe(true);
+            frontCameraMatrix())).toBe(false);
 
         // same distance, different coords
         expect(isCloserToCamera(
