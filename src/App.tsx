@@ -92,15 +92,20 @@ function App() {
       viewProjectionMatrix
     });
 
+    console.log('algo done')
+
 
     const domElementSize = new THREE.Vector2(renderer.domElement.width, renderer.domElement.height);
     const screenData = projectResultToScreen(data, domElementSize)
 
+    console.log(screenData)
+
     // for (const point of screenData.debugSpheres) {
     //   sceneOpts.current!.scene.add(createSphere(point));
     // }
-
+    console.log('drawing')
     drawFromSegments(canvasRef.current, screenData)
+    console.log('done')
   }
 
   async function executeOnFile(e: ChangeEvent<HTMLInputElement, HTMLInputElement>) {
@@ -118,7 +123,11 @@ function App() {
 
     worldOpts.current!.scene.add(model);
 
-    execute(meshToWorldTriangles(model).map(t => t.flat()));
+    console.log('model loaded')
+    const tris = meshToWorldTriangles(model).map(t => t.flat());
+    console.log('triangles created')
+
+    execute(tris);
   }
 
   return (

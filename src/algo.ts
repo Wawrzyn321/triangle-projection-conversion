@@ -10,6 +10,8 @@ import { buildProjectionLineFromMatrix } from './buildProjectionLineFromMatrix';
 import { intersectProjectionLineWithSegment } from './intersectProjectionLineWithSegment';
 import { isCloserToCamera } from './utils/isCloserToCamera';
 
+const MIN_SEGMENT_WIDTH_SQ = 0.005;
+
 type Args = {
   viewProjectionMatrix: THREE.Matrix4;
   inputTriangles: number[][]
@@ -22,10 +24,11 @@ export function algo({ viewProjectionMatrix, inputTriangles }: Args): AlgoReturn
 
   const triangles: TriangleData[] = mapInitialTriangles(inputTriangles, worldToProjectionBound);
 
+  console.log('algo: triangles mapped');
+
   let processedTriangles: TriangleData[] = [];
   const debugLines: Segment2d[] = [];
   const debugPoints: THREE.Vector2[] = [];
-  const debugSpheres: THREE.Vector3[] = [];
 
   for (const triangle of triangles) {
     const TEMP = sortTriangle(triangle);
@@ -35,6 +38,7 @@ export function algo({ viewProjectionMatrix, inputTriangles }: Args): AlgoReturn
     const nextProcessedTriangles: TriangleData[] = []
 
     for (const otherTriangle of processedTriangles) {
+
       const OTHER_TRIANGLE_NEW_DATA = copyTriangleData(otherTriangle);
       const touched = [false, false, false]
       // intersections for other triangle
@@ -47,6 +51,11 @@ export function algo({ viewProjectionMatrix, inputTriangles }: Args): AlgoReturn
         for (let currentTriangleEdgeSegmentIndex = 0; currentTriangleEdgeSegmentIndex < currentTriangleEdge.edgeSegments2d.length; currentTriangleEdgeSegmentIndex++) {
           const currentTriangleEdgeSegment = currentTriangleEdge.edgeSegments2d[currentTriangleEdgeSegmentIndex];
           const currentTriangleEdgeSegment3d = currentTriangleEdge.edgeSegments3d[currentTriangleEdgeSegmentIndex];
+
+          if (currentTriangleEdgeSegment[0].distanceToSquared(currentTriangleEdgeSegment[1]) <= MIN_SEGMENT_WIDTH_SQ) {
+            continue;
+          }
+
           console.assert(otherTriangle.edges.length === 3);
           for (let otherTriangleEdgeIndex = 0; otherTriangleEdgeIndex < 3; otherTriangleEdgeIndex++) {
             const otherTriangleEdge = otherTriangle.edges[otherTriangleEdgeIndex];
@@ -55,6 +64,17 @@ export function algo({ viewProjectionMatrix, inputTriangles }: Args): AlgoReturn
             for (let otherTriangleEdgeSegmentIndex = 0; otherTriangleEdgeSegmentIndex < otherTriangleEdge.edgeSegments2d.length; otherTriangleEdgeSegmentIndex++) {
               const otherTriangleEdgeSegment = otherTriangleEdge.edgeSegments2d[otherTriangleEdgeSegmentIndex];
               const otherTriangleEdgeSegment3d = otherTriangleEdge.edgeSegments3d[otherTriangleEdgeSegmentIndex];
+
+
+              if (otherTriangleEdgeSegment[0].distanceToSquared(otherTriangleEdgeSegment[1]) <= MIN_SEGMENT_WIDTH_SQ) {
+                continue;
+              }
+
+              if (currentTriangleEdgeSegment[0].equals(otherTriangleEdgeSegment[0]) || currentTriangleEdgeSegment[0].equals(otherTriangleEdgeSegment[1])
+                || currentTriangleEdgeSegment[1].equals(otherTriangleEdgeSegment[0]) || currentTriangleEdgeSegment[1].equals(otherTriangleEdgeSegment[1])
+              ) {
+                continue;
+              }
 
               const intersectionPoint = segmentIntersection(
                 currentTriangleEdgeSegment[0],
