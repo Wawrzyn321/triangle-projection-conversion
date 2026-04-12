@@ -1,7 +1,7 @@
 import { AlgoReturn, } from "../types";
 import * as THREE from 'three';
 
-export function drawFromSegments(canvas: HTMLCanvasElement | null, data: AlgoReturn) {
+export function drawFromSegments(canvas: HTMLCanvasElement | null, data: AlgoReturn, debugs = false) {
     const ctx = canvas?.getContext("2d");
     if (!ctx) throw Error("BRZYDKO");
 
@@ -18,39 +18,43 @@ export function drawFromSegments(canvas: HTMLCanvasElement | null, data: AlgoRet
         }
     }
 
-    ctx.strokeStyle = "blue";
-    for (const segment of data.debugLines) {
-        drawLine(ctx, segment[0], segment[1])
-    }
+    if (debugs) {
+        ctx.strokeStyle = "blue";
+        for (const segment of data.debugLines) {
+            drawLine(ctx, segment[0], segment[1])
+        }
 
-    ctx.fillStyle = 'red';
-    for (const point of data.debugPoints) {
-        drawPoint(ctx, point);
+        ctx.fillStyle = 'red';
+        for (const point of data.debugPoints) {
+            drawPoint(ctx, point);
+        }
     }
 }
 
-function drawLine(ctx: CanvasRenderingContext2D, pointA: THREE.Vector2, pointB: THREE.Vector2) {
+function drawLine(ctx: CanvasRenderingContext2D, pointA: THREE.Vector2, pointB: THREE.Vector2, withHead = false) {
     ctx.beginPath();
     ctx.moveTo(pointA.x, pointA.y);
     ctx.lineTo(pointB.x, pointB.y);
     ctx.closePath();
     ctx.stroke();
 
-    const angle = Math.atan2(pointA.y - pointB.y, pointA.x - pointB.x);
-    const length = 10;
-    const addAngle = Math.PI / 6;
+    if (withHead) {
+        const angle = Math.atan2(pointA.y - pointB.y, pointA.x - pointB.x);
+        const length = 10;
+        const addAngle = Math.PI / 6;
 
-    ctx.beginPath();
-    ctx.moveTo(pointB.x, pointB.y);
-    ctx.lineTo(pointB.x + Math.cos(angle + addAngle) * length, pointB.y + Math.sin(angle + addAngle) * length);
-    ctx.closePath();
-    ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pointB.x, pointB.y);
+        ctx.lineTo(pointB.x + Math.cos(angle + addAngle) * length, pointB.y + Math.sin(angle + addAngle) * length);
+        ctx.closePath();
+        ctx.stroke();
 
-    ctx.beginPath();
-    ctx.moveTo(pointB.x, pointB.y);
-    ctx.lineTo(pointB.x + Math.cos(angle - addAngle) * length, pointB.y + Math.sin(angle - addAngle) * length);
-    ctx.closePath();
-    ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(pointB.x, pointB.y);
+        ctx.lineTo(pointB.x + Math.cos(angle - addAngle) * length, pointB.y + Math.sin(angle - addAngle) * length);
+        ctx.closePath();
+        ctx.stroke();
+    }
 }
 
 function drawPoint(ctx: CanvasRenderingContext2D, point: THREE.Vector2) {

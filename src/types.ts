@@ -20,3 +20,9 @@ export type AlgoReturn = {
     debugPoints: THREE.Vector2[];
     // debugSpheres: THREE.Vector3[];
 }
+
+export type ProgressData = {
+    triangles: number;
+    maxTriangles: number;
+    iterationsProgress: number;
+}

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { worldToProjection } from './utils/worldToProjection';
-import { TriangleData, AlgoReturn, Segment2d, Segment3d } from './types';
+import { TriangleData, AlgoReturn, Segment2d, Segment3d, ProgressData } from './types';
 import { mapInitialTriangles } from './utils/mapInitialTriangles';
 import { copyTriangleData } from './utils/copyTriangleData';
 import { pointSideOfSegment } from './utils/pointSideOfSegment';
@@ -14,17 +14,25 @@ const MIN_SEGMENT_WIDTH_SQ = 0.005;
 
 type Args = {
   viewProjectionMatrix: THREE.Matrix4;
-  inputTriangles: number[][]
+  inputTriangles: number[][];
+  callback(progress: ProgressData): void;
 }
 
-export function algo({ viewProjectionMatrix, inputTriangles }: Args): AlgoReturn {
+export async function algo({ viewProjectionMatrix, inputTriangles, callback }: Args): Promise<AlgoReturn> {
   const worldToProjectionBound = (point: THREE.Vector3) => {
     return worldToProjection(point, viewProjectionMatrix)
   }
 
   const triangles: TriangleData[] = mapInitialTriangles(inputTriangles, worldToProjectionBound);
 
-  console.log('algo: triangles mapped');
+  const p: ProgressData = {
+    iterationsProgress: 0,
+    maxTriangles: triangles.length,
+    triangles: 0,
+  }
+
+  let t = 0;
+  let prevProgress = 0;
 
   let processedTriangles: TriangleData[] = [];
   const debugLines: Segment2d[] = [];
@@ -38,6 +46,7 @@ export function algo({ viewProjectionMatrix, inputTriangles }: Args): AlgoReturn
     const nextProcessedTriangles: TriangleData[] = []
 
     for (const otherTriangle of processedTriangles) {
+      t++;
 
       const OTHER_TRIANGLE_NEW_DATA = copyTriangleData(otherTriangle);
       const touched = [false, false, false]
@@ -176,13 +185,25 @@ export function algo({ viewProjectionMatrix, inputTriangles }: Args): AlgoReturn
       nextProcessedTriangles.push(OTHER_TRIANGLE_NEW_DATA);
     }
 
-    processedTriangles = [...nextProcessedTriangles, CURRENT_TRIANGLE_NEW_DATA]
-  }
+    processedTriangles = [...nextProcessedTriangles, CURRENT_TRIANGLE_NEW_DATA];
+
+    p.triangles++;
+    const nextProgress = t / (triangles.length * (triangles.length + 1) / 2) * 100;
+    p.iterationsProgress = nextProgress;
+    if (nextProgress - prevProgress > 1) {
+      await new Promise(resolve => setTimeout(resolve));
+      callback(p)
+      prevProgress = nextProgress;
+    }
+    }
+
+  p.triangles = p.maxTriangles;
+  p.iterationsProgress = 100;
+  callback(p)
 
   return {
     triangles: processedTriangles,
     debugLines,
     debugPoints,
-    // debugSpheres,
   }
 }

@@ -64,3 +64,17 @@ export function createSphere(position: THREE.Vector3) {
     return sphere;
 
 }
+
+export function clearScene(scene: THREE.Scene) {
+    while (scene.children.length > 0) {
+        scene.remove(scene.children[0]);
+    }
+}
+
+export function createWireframe(geometry: THREE.BufferGeometry) {
+    return new THREE.LineSegments(
+        new THREE.EdgesGeometry(geometry),
+        new THREE.LineBasicMaterial({ color: 0xFFFFFF })
+    )
+}
+

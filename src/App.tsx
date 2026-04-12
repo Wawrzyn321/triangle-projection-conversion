@@ -1,16 +1,22 @@
-import { ChangeEvent, useEffect, useRef } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
-import { createCamera, createTriangle, createLine, setupControls, createSphere } from './utils/sceneHelpers';
+import { clearScene, createCamera, createTriangle, createWireframe, setupControls } from './utils/sceneHelpers';
 import { drawFromSegments } from './utils/canvasHelpers';
 import { projectResultToScreen } from './utils/projectResultToScreen';
-import { STLLoader } from 'three/addons/loaders/STLLoader.js';
 
 import { algo } from './algo';
-import { FIRST_TRIANGLE, SECOND_TRIANGLE, THIRD_TRIANGLE, FIRST_LINE, SECOND_LINE } from './triangles';
+import { FIRST_TRIANGLE, SECOND_TRIANGLE, THIRD_TRIANGLE } from './triangles';
+import { meshToWorldTriangles } from './utils/meshToWorldTriangles';
+import { removeOccludedTris } from './utils/removeOccludedTris';
+import { CameraAnimator } from './CameraAnimator';
+import { loadGeometryFromFile } from './utils/loadGeometryFromFile';
+import { CameraPresets } from './CameraPresets';
+import { getModelBBSize } from './utils/getModelBBSize';
 
-export const WIDTH = 600;
-export const HEIGHT = 450;
+const WIDTH = 600;
+const HEIGHT = 450;
+const BASE_SCALE = 4;
 
 const TRIANGLES = [{
   verts: FIRST_TRIANGLE,
@@ -30,7 +36,10 @@ function App() {
     scene: THREE.Scene,
     renderer: THREE.WebGLRenderer,
   } | null>(null);
+  const modelRef = useRef<null | THREE.Mesh>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const animatorRef = useRef<CameraAnimator | null>(null);
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
     const rendererTarget = rendererRef.current;
@@ -47,8 +56,15 @@ function App() {
     const controls = setupControls(camera, renderer);
 
     TRIANGLES.forEach(triangle => scene.add(createTriangle(triangle.verts, triangle.color)));
+    console.log(controls);
 
-    function animate() {
+    const animator = new CameraAnimator(camera, controls);
+    animatorRef.current = animator;
+
+    // let prevTime = 0;
+    function animate(time: DOMHighResTimeStamp) {
+      // const dt = time - prevTime;
+      // prevTime = time;
       controls.update();
       renderer.render(scene, camera);
     }
@@ -66,104 +82,100 @@ function App() {
       worldOpts.current = null;
       console.log('destroy')
     }
+    // eslint-disable-next-line
   }, [module.hot])
 
-
-  // function onClick(event: MouseEvent) {
-  //   const mouse = new THREE.Vector2()
-  //   mouse.set((event.clientX / sceneOpts.current!.renderer.domElement.clientWidth) * 2 - 1,
-  //     -(event.clientY / sceneOpts.current!.renderer.domElement.clientHeight) * 2 + 1)
-
-  //   const raycaster = new THREE.Raycaster()
-  //   raycaster.setFromCamera(mouse, sceneOpts.current!.camera)
-  //   console.log(mouse);
-  //   const intersects = raycaster.intersectObjects(sceneOpts.current!.meshes, false)
-  //   console.log(intersects);
-  // }
-
-  function execute(inputTriangles: number[][]) {
+  async function execute(inputTriangles: number[][]) {
     const { camera, renderer } = worldOpts.current!
 
     const viewProjectionMatrix = new THREE.Matrix4()
       .multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
 
-    const data = algo({
+    const data = await algo({
       inputTriangles,
-      viewProjectionMatrix
+      viewProjectionMatrix,
+      callback: ({ triangles, maxTriangles, iterationsProgress }) => {
+        setMessage(`Triangles: ${triangles}/${maxTriangles}, iterations: ${iterationsProgress.toFixed(2)}%`);
+      }
     });
-
-    console.log('algo done')
-
 
     const domElementSize = new THREE.Vector2(renderer.domElement.width, renderer.domElement.height);
     const screenData = projectResultToScreen(data, domElementSize)
 
-    console.log(screenData)
-
-    // for (const point of screenData.debugSpheres) {
-    //   sceneOpts.current!.scene.add(createSphere(point));
-    // }
-    console.log('drawing')
     drawFromSegments(canvasRef.current, screenData)
-    console.log('done')
   }
 
-  async function executeOnFile(e: ChangeEvent<HTMLInputElement, HTMLInputElement>) {
-    const file = e.target.files![0];
-    const data = await file.arrayBuffer();
+  async function loadModel(e: ChangeEvent<HTMLInputElement, HTMLInputElement>) {
+    const { scene } = worldOpts.current!;
 
-    const loader = new STLLoader();
-    // const geometry = await loader.loadAsync('./FPV-Wing-v3.6-Base_Print.stl')
-    const geometry = loader.parse(data)
-    const model = new THREE.Mesh(geometry);
+    if (!e.target.files) return;
 
-    while (worldOpts.current!.scene.children.length > 0) {
-      worldOpts.current!.scene.remove(worldOpts.current!.scene.children[0]);
+    const geometry = await loadGeometryFromFile(e.target.files[0]);
+
+    // scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+
+    // const dirLight = new THREE.DirectionalLight(0xffffff, 100);
+    // dirLight.position.set(5, 10, 5);
+    // scene.add(dirLight);
+
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x808080,
+    });
+
+    //     const material = new THREE.MeshStandardMaterial({
+    //   color: 0xcccccc,
+    //   roughness: 0.6,
+    //   metalness: 0.1,
+    // });
+    const model = new THREE.Mesh(geometry, material);
+    model.add(createWireframe(geometry));
+
+    clearScene(scene);
+
+    scene.add(model);
+
+    modelRef.current = model;
+
+    const size = getModelBBSize(model);
+    const scale = BASE_SCALE / Math.max(size.x, size.y, size.z);
+    model.scale.set(scale, scale, scale);
+  }
+
+  function executeModel() {
+    const model = modelRef.current;
+    if (!model) return;
+
+    const tris = meshToWorldTriangles(model)
+
+    const size = getModelBBSize(model);
+    const scale = BASE_SCALE / Math.max(size.x, size.y, size.z);
+
+    for (const triangle of tris) {
+      for (let i = 0; i < 9; i++) {
+        triangle[i] *= scale;
+      }
     }
 
-    worldOpts.current!.scene.add(model);
-
-    console.log('model loaded')
-    const tris = meshToWorldTriangles(model).map(t => t.flat());
-    console.log('triangles created')
-
-    execute(tris);
+    const nextTris = removeOccludedTris(tris, worldOpts.current!.camera.position);
+    console.log(tris.length, nextTris.length)
+    execute(nextTris);
   }
 
   return (
     <main>
+      {message}
       <div ref={rendererRef} />
-      <button style={{ display: 'block' }} onClick={() => execute(TRIANGLES.map(tri => tri.verts))}>execute</button>
-      <input type='file' onChange={executeOnFile} />
+      <div>
+        <button onClick={() => execute(TRIANGLES.map(tri => tri.verts))}>execute on triangles</button>
+        <input type='file' onChange={loadModel} />
+        <button onClick={executeModel}>execute on model</button>
+        <div>
+          <CameraPresets animatorRef={animatorRef} objectRef={modelRef} />
+        </div>
+      </div>
       <canvas ref={canvasRef} width={WIDTH} height={HEIGHT}></canvas>
     </main>
   );
 }
 
 export default App;
-
-
-function meshToWorldTriangles(mesh: THREE.Mesh): number[][][] {
-  const geom = mesh.geometry.clone();
-  const nonIndexed = geom.index ? geom.toNonIndexed() : geom;
-  const posAttr = nonIndexed.getAttribute("position") as THREE.BufferAttribute;
-
-  const triangles: number[][][] = [];
-  const v = new THREE.Vector3();
-
-  mesh.updateMatrixWorld(true);
-
-  for (let i = 0; i < posAttr.count; i += 3) {
-    const tri: number[][] = [];
-
-    for (let j = 0; j < 3; j++) {
-      v.set(posAttr.getX(i + j), posAttr.getY(i + j), posAttr.getZ(i + j));
-      v.applyMatrix4(mesh.matrixWorld);
-      tri.push([v.x, v.y, v.z]);
-    }
-
-    triangles.push(tri);
-  }
-
-  return triangles;
-}
