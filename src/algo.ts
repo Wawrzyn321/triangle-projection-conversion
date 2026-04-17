@@ -9,6 +9,7 @@ import { sortTriangle } from './utils/sortTriangle';
 import { buildProjectionLineFromMatrix } from './buildProjectionLineFromMatrix';
 import { intersectProjectionLineWithSegment } from './intersectProjectionLineWithSegment';
 import { isCloserToCamera } from './utils/isCloserToCamera';
+import { removeDullEdges } from './utils/removeDullEdges';
 
 const MIN_SEGMENT_WIDTH_SQ = 0.005;
 
@@ -35,7 +36,7 @@ export async function algo({ viewProjectionMatrix, inputTriangles, callback }: A
   let prevProgress = 0;
 
   let processedTriangles: TriangleData[] = [];
-  const debugLines: Segment2d[] = [];
+  // const debugLines: Segment2d[] = [];
   const debugPoints: THREE.Vector2[] = [];
 
   for (const triangle of triangles) {
@@ -195,15 +196,15 @@ export async function algo({ viewProjectionMatrix, inputTriangles, callback }: A
       callback(p)
       prevProgress = nextProgress;
     }
-    }
+  }
 
   p.triangles = p.maxTriangles;
   p.iterationsProgress = 100;
-  callback(p)
+  callback(p);
 
   return {
-    triangles: processedTriangles,
-    debugLines,
+    triangles: removeDullEdges(processedTriangles),
+    debugLines: [],
     debugPoints,
   }
 }

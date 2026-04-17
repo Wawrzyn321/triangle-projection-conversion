@@ -56,7 +56,6 @@ function App() {
     const controls = setupControls(camera, renderer);
 
     TRIANGLES.forEach(triangle => scene.add(createTriangle(triangle.verts, triangle.color)));
-    console.log(controls);
 
     const animator = new CameraAnimator(camera, controls);
     animatorRef.current = animator;
@@ -111,7 +110,8 @@ function App() {
     if (!e.target.files) return;
 
     const geometry = await loadGeometryFromFile(e.target.files[0]);
-
+    e.target.value = '';
+    // geometry.setDrawRange(0, 6);
     // scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
     // const dirLight = new THREE.DirectionalLight(0xffffff, 100);
@@ -157,7 +157,7 @@ function App() {
     }
 
     const nextTris = removeOccludedTris(tris, worldOpts.current!.camera.position);
-    console.log(tris.length, nextTris.length)
+    // console.log(tris.length, nextTris.length)
     execute(nextTris);
   }
 
