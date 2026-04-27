@@ -8,7 +8,12 @@ export function getNormalAndCenter(triangle: number[]) {
   const ab = new THREE.Vector3().subVectors(b, a);
   const ac = new THREE.Vector3().subVectors(c, a);
 
-  const normal = new THREE.Vector3().crossVectors(ab, ac).normalize();
+  const cross = new THREE.Vector3().crossVectors(ab, ac);
+  if (cross.lengthSq() === 0) {
+    console.log(null)
+    return null;
+  }
+  const normal = cross.normalize();
 
   const center = a.clone().add(b).add(c).divideScalar(3);
 

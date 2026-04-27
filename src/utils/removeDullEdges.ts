@@ -12,10 +12,10 @@ export function removeDullEdges(processedTriangles: TriangleData[], minAngleDegr
       handle(originalTriangle, otherTriangle, minAngleRads);
     }
 
-    newTriangles.push(originalTriangle)
+    newTriangles.push(originalTriangle);
   }
 
-  return processedTriangles;
+  return newTriangles;
 }
 
 function handle(ORIGINAL_TRIANGLE: TriangleData, OTHER_TRIANGLE: TriangleData, minAngleRads: number) {
@@ -23,9 +23,9 @@ function handle(ORIGINAL_TRIANGLE: TriangleData, OTHER_TRIANGLE: TriangleData, m
     for (let OTHER_TRIANGLE_edgeIndex = 0; OTHER_TRIANGLE_edgeIndex < 3; OTHER_TRIANGLE_edgeIndex++) {
       if (
         (ORIGINAL_TRIANGLE.edges[ORIGINAL_TRIANGLE_edgeIndex].start.equals(OTHER_TRIANGLE.edges[OTHER_TRIANGLE_edgeIndex].start) &&
-        ORIGINAL_TRIANGLE.edges[ORIGINAL_TRIANGLE_edgeIndex].end.equals(OTHER_TRIANGLE.edges[OTHER_TRIANGLE_edgeIndex].end) )||
+          ORIGINAL_TRIANGLE.edges[ORIGINAL_TRIANGLE_edgeIndex].end.equals(OTHER_TRIANGLE.edges[OTHER_TRIANGLE_edgeIndex].end)) ||
         (ORIGINAL_TRIANGLE.edges[ORIGINAL_TRIANGLE_edgeIndex].end.equals(OTHER_TRIANGLE.edges[OTHER_TRIANGLE_edgeIndex].start) &&
-        ORIGINAL_TRIANGLE.edges[ORIGINAL_TRIANGLE_edgeIndex].start.equals(OTHER_TRIANGLE.edges[OTHER_TRIANGLE_edgeIndex].end))
+          ORIGINAL_TRIANGLE.edges[ORIGINAL_TRIANGLE_edgeIndex].start.equals(OTHER_TRIANGLE.edges[OTHER_TRIANGLE_edgeIndex].end))
       ) {
         const common1 = ORIGINAL_TRIANGLE.edges[ORIGINAL_TRIANGLE_edgeIndex].start;
         const common2 = ORIGINAL_TRIANGLE.edges[ORIGINAL_TRIANGLE_edgeIndex].end;

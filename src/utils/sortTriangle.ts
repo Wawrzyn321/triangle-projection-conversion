@@ -3,6 +3,10 @@ import { copyTriangleData } from './copyTriangleData';
 
 
 export function sortTriangle(source: TriangleData): TriangleData {
+  if (source.edges.length !== 3 || source.edges.some(e => e.edgeSegments2d.length !== 1 || e.edgeSegments3d.length !== 1)) {
+    throw new Error('sortTriangle expects exactly one segment per edge');
+  }
+
   const [a, b, c] = source.edges.map(e => e.edgeSegments2d[0][0]);
 
   const cross = (b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y);

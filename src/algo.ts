@@ -117,7 +117,7 @@ export async function algo({ viewProjectionMatrix, inputTriangles, callback }: A
                         intersectionPoint,
                       ]);
                       newSegments3dForOtherTriangle.push([
-                        otherTriangleEdgeSegment3d[1],
+                        otherTriangleEdgeSegment3d[0],
                         otherEdgePoint
                       ])
                     } else {
@@ -189,7 +189,7 @@ export async function algo({ viewProjectionMatrix, inputTriangles, callback }: A
     processedTriangles = [...nextProcessedTriangles, CURRENT_TRIANGLE_NEW_DATA];
 
     p.triangles++;
-    const nextProgress = t / (triangles.length * (triangles.length + 1) / 2) * 100;
+    const nextProgress = t / (triangles.length * (triangles.length - 1) / 2) * 100;
     p.iterationsProgress = nextProgress;
     if (nextProgress - prevProgress > 1) {
       await new Promise(resolve => setTimeout(resolve));
