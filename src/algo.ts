@@ -10,6 +10,7 @@ import { buildProjectionLineFromMatrix } from './buildProjectionLineFromMatrix';
 import { intersectProjectionLineWithSegment } from './intersectProjectionLineWithSegment';
 import { isCloserToCamera } from './utils/isCloserToCamera';
 import { removeDullEdges } from './utils/removeDullEdges';
+import { removeFlatTriangles } from './removeFlatTriangles';
 
 const MIN_SEGMENT_WIDTH_SQ = 0.005;
 
@@ -24,15 +25,17 @@ export async function algo({ viewProjectionMatrix, inputTriangles, callback }: A
     return worldToProjection(point, viewProjectionMatrix)
   }
 
-  const triangles: TriangleData[] = mapInitialTriangles(inputTriangles, worldToProjectionBound);
+  const trianglesPre: TriangleData[] = mapInitialTriangles(inputTriangles, worldToProjectionBound);
 
-  const p: ProgressData = {
+  const triangles = removeFlatTriangles(trianglesPre, viewProjectionMatrix)
+  console.log(trianglesPre.length, triangles.length)
+  const progressData: ProgressData = {
     iterationsProgress: 0,
     maxTriangles: triangles.length,
     triangles: 0,
   }
 
-  let t = 0;
+  let procesed = 0;
   let prevProgress = 0;
 
   let processedTriangles: TriangleData[] = [];
@@ -47,7 +50,7 @@ export async function algo({ viewProjectionMatrix, inputTriangles, callback }: A
     const nextProcessedTriangles: TriangleData[] = []
 
     for (const otherTriangle of processedTriangles) {
-      t++;
+      procesed++;
 
       const OTHER_TRIANGLE_NEW_DATA = copyTriangleData(otherTriangle);
       const touched = [false, false, false]
@@ -188,19 +191,19 @@ export async function algo({ viewProjectionMatrix, inputTriangles, callback }: A
 
     processedTriangles = [...nextProcessedTriangles, CURRENT_TRIANGLE_NEW_DATA];
 
-    p.triangles++;
-    const nextProgress = t / (triangles.length * (triangles.length - 1) / 2) * 100;
-    p.iterationsProgress = nextProgress;
+    progressData.triangles++;
+    const nextProgress = procesed / (triangles.length * (triangles.length - 1) / 2) * 100;
+    progressData.iterationsProgress = nextProgress;
     if (nextProgress - prevProgress > 1) {
       await new Promise(resolve => setTimeout(resolve));
-      callback(p)
+      callback(progressData)
       prevProgress = nextProgress;
     }
   }
 
-  p.triangles = p.maxTriangles;
-  p.iterationsProgress = 100;
-  callback(p);
+  progressData.triangles = progressData.maxTriangles;
+  progressData.iterationsProgress = 100;
+  callback(progressData);
 
   return {
     triangles: removeDullEdges(processedTriangles),
