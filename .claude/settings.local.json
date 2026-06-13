@@ -8,7 +8,10 @@
       "Bash(find . *)",
       "Bash(npm test *)",
       "Bash(tsc --version)",
-      "Read(~/.claude/plugins/**)"
+      "Read(~/.claude/plugins/**)",
+      "Bash(npm i *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)"
     ]
   }
 }
