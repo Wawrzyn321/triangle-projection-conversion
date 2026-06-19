@@ -7,6 +7,7 @@ export function MainLayout({ children }: PropsWithChildren) {
   return (
     <>
       <Box
+        hideBelow="sm"
         display="grid"
         alignItems="center"
         w="100%"

@@ -35,10 +35,4 @@ aws domena
 aws s3 static hosting
 aws inne
 
-voting!
-
-ograniczenie wierzhocłków
-
-czcionka
-
 lighthouse

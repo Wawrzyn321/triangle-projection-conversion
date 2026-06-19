@@ -5,23 +5,30 @@ import { loadGeometryFromFile } from '@/algo/utils/loadGeometryFromFile';
 import { type RefObject, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { type WorldOpts } from '../types';
-import { BASE_SCALE } from '../const';
+import { BASE_SCALE, MAX_VERTICES } from '../const';
 import { resetControls } from '../utils/setupControls';
-import { worldToProjection } from '@/algo/utils/worldToProjection';
 
 export function useHandleLoadModel(opts: RefObject<WorldOpts | null>) {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [maxDimension, setMaxDimension] = useState(0);
-  const [otherDim, setOtherDim] = useState(0);
+  const [scalingFactor, setScalingFactor] = useState(0);
   const modelRef = useRef<null | THREE.Mesh>(null);
 
   const handleLoadModel = async (file: File) => {
     if (!opts.current) {
       throw Error('useHandleLoadModel::handleLoadModel: opts is null');
     }
-    const { scene, camera } = opts.current;
+    const { scene } = opts.current;
 
     const geometry = await loadGeometryFromFile(file);
+
+    if (geometry.attributes.position.count > MAX_VERTICES) {
+      alert(
+        `Current algorithm only supports meshes up to ${MAX_VERTICES} vertices, sorry!`,
+      );
+      return;
+    }
+
     const material = new THREE.MeshStandardMaterial();
 
     const model = new THREE.Mesh(geometry, material);
@@ -34,19 +41,10 @@ export function useHandleLoadModel(opts: RefObject<WorldOpts | null>) {
 
     const size = getModelBBSize(model);
     const maxDimension = Math.max(size.x, size.y, size.z);
-    setMaxDimension(maxDimension * 10);
+    setMaxDimension(maxDimension);
+    setScalingFactor(getScalingFactor(maxDimension, 1, 14));
     const scale = BASE_SCALE / maxDimension;
     model.scale.set(scale, scale, scale);
-
-    fn(
-      model,
-      new THREE.Matrix4().multiplyMatrices(
-        camera.threeCamera.projectionMatrix,
-        camera.threeCamera.matrixWorldInverse,
-      ),
-    );
-
-    setOtherDim(0.8);
 
     setModelLoaded(true);
   };
@@ -69,46 +67,23 @@ export function useHandleLoadModel(opts: RefObject<WorldOpts | null>) {
     handleLoadModel,
     handleClearModel,
     maxDimension,
-    otherDim,
+    scalingFactor,
   };
 }
-function fn(
-  model: THREE.Mesh<
-    THREE.BufferGeometry<
-      THREE.NormalBufferAttributes,
-      THREE.BufferGeometryEventMap
-    >,
-    THREE.MeshStandardMaterial,
-    THREE.Object3DEventMap
-  >,
-  viewProjectionMatrix: THREE.Matrix4,
-) {
-  const pos = meshToWorldTriangles(model);
-  console.log(pos.map(p => worldToProjection(p, viewProjectionMatrix)));
-}
 
-function meshToWorldTriangles(mesh: THREE.Mesh) {
-  const geom = mesh.geometry.clone();
-  const nonIndexed = geom.index ? geom.toNonIndexed() : geom;
-  const posAttr = nonIndexed.getAttribute('position') as THREE.BufferAttribute;
-
-  const triangles: THREE.Vector3[] = [];
-  const tempVector = new THREE.Vector3();
-
-  mesh.updateMatrixWorld(true);
-
-  for (let i = 0; i < posAttr.count; i += 3) {
-    for (let j = 0; j < 3; j++) {
-      tempVector.set(
-        posAttr.getX(i + j),
-        posAttr.getY(i + j),
-        posAttr.getZ(i + j),
-      );
-      tempVector.applyMatrix4(mesh.matrixWorld);
-
-      triangles.push(tempVector.clone());
-    }
+function getScalingFactor(dimension: number, min: number, max: number) {
+  let scalingFactor = 1;
+  let maxIterations = 10;
+  while (dimension > max && maxIterations > 0) {
+    dimension /= 10;
+    scalingFactor /= 10;
+    maxIterations++;
   }
-
-  return triangles;
+  maxIterations = 10;
+  while (dimension < min && maxIterations > 0) {
+    dimension *= 10;
+    scalingFactor *= 10;
+    maxIterations++;
+  }
+  return scalingFactor;
 }

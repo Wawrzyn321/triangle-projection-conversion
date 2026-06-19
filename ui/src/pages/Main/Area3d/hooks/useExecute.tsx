@@ -1,10 +1,12 @@
 import { algo } from '@/algo/algo';
-import { projectResultToScreen } from '@/algo/utils/projectResultToScreen';
 import { removeOccludedTris } from '@/algo/utils/removeOccludedTris';
 import { type RefObject, useState } from 'react';
 import * as THREE from 'three';
 import type { AlgoReturn, ProgressData } from '../../types';
 import type { WorldOpts } from './../types';
+import { BASE_SCALE } from '../const';
+
+const MM_PER_CM = 10;
 
 export function useExecute(
   worldOpts: RefObject<WorldOpts | null>,
@@ -12,11 +14,15 @@ export function useExecute(
 ) {
   const [isExecuting, setExecuting] = useState(false);
 
-  async function execute(inputTriangles: number[][], size: number) {
+  async function execute(
+    inputTriangles: number[][],
+    maxDimension: number,
+    scalingFactor: number,
+  ) {
     if (!worldOpts.current) {
       throw Error('execute: opts are null');
     }
-    const { camera, renderer } = worldOpts.current;
+    const { camera } = worldOpts.current;
 
     setExecuting(true);
     const nextTris = removeOccludedTris(inputTriangles, camera.threeCamera);
@@ -34,47 +40,70 @@ export function useExecute(
 
     setExecuting(false);
 
-    const domElementSize = new THREE.Vector2(
-      renderer.domElement.width,
-      renderer.domElement.height,
+    const zoom = camera.threeCamera.zoom;
+    const frustumHalfH = camera.threeCamera.top / zoom;
+    const frustumHalfW = camera.threeCamera.right / zoom;
+    const physicalScale = (maxDimension / BASE_SCALE) * MM_PER_CM;
+
+    const mmData = applyClipToMm(
+      data,
+      frustumHalfW,
+      frustumHalfH,
+      physicalScale * scalingFactor,
     );
-
-    const screenData = projectResultToScreen(data, domElementSize);
-
-    return topLeftAlign(screenData, size);
+    return topLeftAlign(mmData);
   }
 
   return [isExecuting, execute] as const;
 }
 
-function topLeftAlign(data: AlgoReturn, size: number): AlgoReturn {
+function applyClipToMm(
+  data: AlgoReturn,
+  frustumHalfW: number,
+  frustumHalfH: number,
+  physicalScale: number,
+): AlgoReturn {
+  const convert = (pt: THREE.Vector2) =>
+    new THREE.Vector2(
+      pt.x * frustumHalfW * physicalScale,
+      -pt.y * frustumHalfH * physicalScale,
+    );
+
+  return {
+    triangles: data.triangles.map(triangle => ({
+      edges: triangle.edges.map(({ edgeSegments2d, ...rest }) => ({
+        ...rest,
+        edgeSegments2d: edgeSegments2d.map(segment => segment.map(convert)),
+      })),
+    })),
+    debugLines: data.debugLines.map(segment => segment.map(convert)),
+    debugPoints: data.debugPoints.map(convert),
+  };
+}
+
+function topLeftAlign(data: AlgoReturn): AlgoReturn {
   let minX = Infinity,
     minY = Infinity;
 
-  for (const triangle of data.triangles) {
-    for (const edge of triangle.edges) {
-      for (const segment of edge.edgeSegments2d) {
+  for (const triangle of data.triangles)
+    for (const edge of triangle.edges)
+      for (const segment of edge.edgeSegments2d)
         for (const pt of segment) {
           if (pt.x < minX) minX = pt.x;
           if (pt.y < minY) minY = pt.y;
         }
-      }
-    }
-  }
 
-  const transform = (pt: THREE.Vector2) => {
+  const shift = (pt: THREE.Vector2) => {
     pt.x -= minX;
     pt.y -= minY;
-    pt.x /= size;
-    pt.y /= size;
   };
 
   for (const triangle of data.triangles)
     for (const edge of triangle.edges)
-      for (const segment of edge.edgeSegments2d) segment.forEach(transform);
+      for (const segment of edge.edgeSegments2d) segment.forEach(shift);
 
-  for (const segment of data.debugLines) segment.forEach(transform);
-  for (const pt of data.debugPoints) transform(pt);
+  for (const segment of data.debugLines) segment.forEach(shift);
+  for (const pt of data.debugPoints) shift(pt);
 
   return data;
 }

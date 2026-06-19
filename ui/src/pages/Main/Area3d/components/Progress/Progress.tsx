@@ -1,6 +1,7 @@
 import { HStack, Progress as ChakraProgress } from '@chakra-ui/react';
-import type { ProgressData } from '../../types';
+import type { ProgressData } from '../../../types';
 import { useColors } from '@/colors';
+import './Progress.css';
 
 export function Progress({
   progressData,
@@ -23,12 +24,24 @@ export function Progress({
       width="100%"
     >
       <HStack gap="5">
-        <ChakraProgress.Label>
+        <ChakraProgress.Label whiteSpace="nowrap">
           {triangles} / {maxTriangles}
         </ChakraProgress.Label>
-        <ChakraProgress.Track backgroundColor={colors.TERTIARY} flex="1">
+        <progress
+          value={iterationsProgress}
+          max={100}
+          style={
+            {
+              '--progress-track-color': colors.TERTIARY,
+              '--progress-value-color': colors.PRIMARY,
+              width: '100%',
+            } as React.CSSProperties
+          }
+        />
+
+        {/* <ChakraProgress.Track backgroundColor={colors.TERTIARY} flex="1">
           <ChakraProgress.Range backgroundColor={colors.PRIMARY} />
-        </ChakraProgress.Track>
+        </ChakraProgress.Track> */}
         <ChakraProgress.ValueText>
           {iterationsProgress.toFixed(2)}%
         </ChakraProgress.ValueText>

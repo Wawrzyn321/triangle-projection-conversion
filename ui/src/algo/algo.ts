@@ -185,7 +185,7 @@ export async function algo({
                     otherTriangleEdgeSegment[1],
                   );
                   if (otherTrianglePointASide === otherTrianglePointBSide) {
-                    // console.log("same")
+                    // same
                   } else {
                     if (otherTrianglePointASide === 'left') {
                       debugPoints.push(otherTriangleEdgeSegment[0]);
@@ -221,7 +221,7 @@ export async function algo({
                     currentTriangleEdgeSegment[1],
                   );
                   if (currentTrianglePoint0Side === currentTrianglePoint1Side) {
-                    // console.log("same")
+                    // same
                   } else {
                     if (currentTrianglePoint0Side === 'left') {
                       debugPoints.push(currentTriangleEdgeSegment[0]);

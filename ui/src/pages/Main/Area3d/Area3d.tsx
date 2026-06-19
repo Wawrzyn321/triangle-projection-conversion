@@ -9,7 +9,7 @@ import { getScaledTriangles } from './utils/getScaledTriangles';
 import type { WorldOpts } from './types';
 import type { AlgoReturn, ProgressData } from '../types';
 
-import { Progress } from './components/Progress';
+import { Progress } from './components/Progress/Progress';
 import { OrientationCube } from './components/OrientationCube/OrientationCube';
 import { FileSelectOverlay } from './components/FileSelectOverlay';
 
@@ -36,7 +36,7 @@ export function Area3d({ setResult }: Props) {
     handleLoadModel,
     handleClearModel,
     maxDimension,
-    otherDim,
+    scalingFactor,
   } = useHandleLoadModel(worldOpts);
 
   const [isExecuting, execute] = useExecute(worldOpts, setProgressData);
@@ -71,20 +71,16 @@ export function Area3d({ setResult }: Props) {
     if (!model) {
       throw Error('executeModel: model is null');
     }
-    console.log({ maxDimension, otherDim });
     const result = await execute(
       getScaledTriangles(model),
-      ((maxDimension / 10) * 2) / otherDim,
+      maxDimension,
+      scalingFactor,
     );
-    console.log(result);
     setResult(result);
   }
 
   return (
-    <Box
-      backgroundColor={colors.BACKGROUND_ACCENT}
-      h={[undefined, '60vh', '80%']}
-    >
+    <Box h={[undefined, '60vh', '80%']}>
       <Box position="relative" width="100%" height="100%">
         <Box h={`calc(100% - ${BOTTOM_BAR_HEIGHT})`} ref={rendererRef}></Box>
         {!modelLoaded && <FileSelectOverlay onModelLoad={handleLoadModel} />}
@@ -102,6 +98,7 @@ export function Area3d({ setResult }: Props) {
                 backgroundColor={
                   colors.theme === 'dark' ? colors.PRIMARY : colors.SECONDARY
                 }
+                disabled={isExecuting}
                 onClick={handleClearModel}
                 color={colors.WHITE}
               >

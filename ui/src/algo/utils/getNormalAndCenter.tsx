@@ -10,7 +10,6 @@ export function getNormalAndCenter(triangle: number[]) {
 
   const cross = new THREE.Vector3().crossVectors(ab, ac);
   if (cross.lengthSq() === 0) {
-    console.log(null);
     return null;
   }
   const normal = cross.normalize();
