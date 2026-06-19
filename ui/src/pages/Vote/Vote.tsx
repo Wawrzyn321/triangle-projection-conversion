@@ -13,24 +13,22 @@ export function Vote() {
   async function handleVote(key: (typeof FEATURES)[number]['key']) {
     saveVote(key);
     setExistingVote(key);
-
   }
 
   return (
-    <main>
-      <Article>
-        <Heading>Vote for new features!</Heading>
-        {existingVote && <VoteAlert />}
-        <ListRoot>
-          {FEATURES.map(feature => (
-            <VoteOption
-              feature={feature}
-              disabled={!!existingVote}
-              handleVote={handleVote}
-            />
-          ))}
-        </ListRoot>
-      </Article>
-    </main>
+    <Article>
+      <Heading>Vote for new features!</Heading>
+      {existingVote && <VoteAlert />}
+      <ListRoot>
+        {FEATURES.map(feature => (
+          <VoteOption
+            feature={feature}
+            disabled={!!existingVote}
+            handleVote={handleVote}
+            key={feature.key}
+          />
+        ))}
+      </ListRoot>
+    </Article>
   );
 }

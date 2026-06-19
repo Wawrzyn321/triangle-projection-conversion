@@ -41,4 +41,4 @@ ograniczenie wierzhocłków
 
 czcionka
 
-black theme
+lighthouse

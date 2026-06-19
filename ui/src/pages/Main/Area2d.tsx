@@ -2,6 +2,7 @@ import { AspectRatio, Flex } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import type { AlgoReturn } from './types';
 import { drawFromSegments } from '@/algo/utils/canvasHelpers';
+import { useColors } from '@/colors';
 
 const SIZE_PRESETS = (
   [
@@ -22,12 +23,12 @@ type Props = {
 export function Area2d({ result }: Props) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [size, setSize] = useState('A4');
+  const colors = useColors();
 
   const preset = SIZE_PRESETS.find(p => p.name === size)!;
 
   useEffect(() => {
     if (result) {
-      console.log(result);
       drawFromSegments(canvasRef.current, result);
     }
   }, [result, size]);
@@ -39,6 +40,7 @@ export function Area2d({ result }: Props) {
         w="100%"
         ratio={Math.SQRT1_2}
         margin={[undefined, '0 auto']}
+        backgroundColor={colors.PAPER}
       >
         <canvas
           width={preset.width}
@@ -48,7 +50,11 @@ export function Area2d({ result }: Props) {
       </AspectRatio>
       <Flex justify="space-between">
         {preset.height} x {preset.width}mm
-        <select onChange={e => setSize(e.target.value)} value={size}>
+        <select
+          name="paper-size"
+          onChange={e => setSize(e.target.value)}
+          value={size}
+        >
           {SIZE_PRESETS.map(preset => (
             <option key={preset.name}>{preset.name}</option>
           ))}

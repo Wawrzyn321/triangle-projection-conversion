@@ -1,12 +1,13 @@
 import { Alert } from '@chakra-ui/react';
-import { colors } from '@/colors';
+import { useColors } from '@/colors';
 
 export function VoteAlert() {
+  const colors = useColors();
   return (
     <Alert.Root backgroundColor={colors.PRIMARY} color={colors.BACKGROUND}>
-      <Alert.Indicator />
+      <Alert.Indicator color={colors.WHITE} />
       <Alert.Content>
-        <Alert.Title>
+        <Alert.Title color={colors.WHITE}>
           Thank you for casting your vote, it helps me with priorities!
         </Alert.Title>
       </Alert.Content>

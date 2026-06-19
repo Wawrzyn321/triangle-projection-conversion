@@ -9,7 +9,9 @@ export function PageLayout() {
   return (
     <VStack minH="100vh" rowGap={10}>
       <Header />
-      <Router />
+      <main>
+        <Router />
+      </main>
       <Footer />
     </VStack>
   );

@@ -1,12 +1,14 @@
 import { HStack, Progress as ChakraProgress } from '@chakra-ui/react';
 import type { ProgressData } from '../../types';
-import { colors } from '@/colors';
+import { useColors } from '@/colors';
 
 export function Progress({
   progressData,
 }: {
   progressData: ProgressData | null;
 }) {
+  const colors = useColors();
+
   if (!progressData) return null;
 
   const { iterationsProgress, maxTriangles, triangles } = progressData;

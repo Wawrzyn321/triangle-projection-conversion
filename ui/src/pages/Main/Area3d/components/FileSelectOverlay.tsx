@@ -1,12 +1,14 @@
-import { colors } from '@/colors';
+import { useColors } from '@/colors';
 import { Center, Button, Text } from '@chakra-ui/react';
 import React, { useRef, useState, type ChangeEvent } from 'react';
+import { BOTTOM_BAR_HEIGHT } from '../const';
 
 export function FileSelectOverlay({
   onModelLoad,
 }: {
   onModelLoad: (file: File) => void;
 }) {
+  const colors = useColors();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
@@ -47,7 +49,7 @@ export function FileSelectOverlay({
     <Center
       position="absolute"
       width="100%"
-      height="100%"
+      height={`calc(100% - ${BOTTOM_BAR_HEIGHT})`}
       top="0"
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
@@ -65,8 +67,14 @@ export function FileSelectOverlay({
         border={buttonBorder}
         borderRadius={15}
       >
-        <Text fontSize="md">Select .stl file</Text>
-        <Text fontSize="xs" fontWeight="light">
+        <Text fontSize="md" color={colors.BACKGROUND_INVERSE}>
+          Select .stl file
+        </Text>
+        <Text
+          fontSize="xs"
+          color={colors.BACKGROUND_INVERSE}
+          fontWeight="light"
+        >
           Or drop the file here
         </Text>
         <input

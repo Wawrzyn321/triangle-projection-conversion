@@ -1,6 +1,6 @@
 import type { FEATURES } from './FEATURES';
 import { Button, Flex, ListItem, Text } from '@chakra-ui/react';
-import { colors } from '@/colors';
+import { useColors } from '@/colors';
 
 type Props = {
   feature: (typeof FEATURES)[number];
@@ -9,6 +9,7 @@ type Props = {
 };
 
 export function VoteOption({ feature, handleVote, disabled }: Props) {
+  const colors = useColors();
   return (
     <ListItem key={feature.key}>
       <Text fontSize="lg">{feature.name}</Text>
@@ -19,6 +20,7 @@ export function VoteOption({ feature, handleVote, disabled }: Props) {
           disabled={disabled}
           onClick={() => handleVote(feature.key)}
           height="32px"
+          color={colors.WHITE}
         >
           Vote
         </Button>
