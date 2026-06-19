@@ -40,8 +40,8 @@ export function FileSelectOverlay({
   }
 
   const buttonBorder = dragOver
-    ? `4px dashed ${colors.RIGHT}`
-    : `1px dashed ${colors.LEFT}`;
+    ? `4px dashed ${colors.PRIMARY}`
+    : `1px dashed ${colors.SECONDARY}`;
 
   return (
     <Center

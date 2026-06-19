@@ -1,20 +1,36 @@
-import { HStack, Progress as ChakraProgress } from "@chakra-ui/react"
-import type { ProgressData } from "../../types"
-import { colors } from "@/colors";
+import { HStack, Progress as ChakraProgress } from '@chakra-ui/react';
+import type { ProgressData } from '../../types';
+import { colors } from '@/colors';
 
-export function Progress({ progressData }: { progressData: ProgressData | null }) {
-    console.log(progressData)
-    if (!progressData) return null;
+export function Progress({
+  progressData,
+}: {
+  progressData: ProgressData | null;
+}) {
+  if (!progressData) return null;
 
-    const { iterationsProgress, maxTriangles, triangles } = progressData;
+  const { iterationsProgress, maxTriangles, triangles } = progressData;
 
-    return <ChakraProgress.Root paddingInline={5} size='lg' animated value={iterationsProgress} maxW="sm" width="100%">
-        <HStack gap="5">
-            <ChakraProgress.Label>{triangles} / {maxTriangles}</ChakraProgress.Label>
-            <ChakraProgress.Track backgroundColor={colors.TOP} flex="1">
-                <ChakraProgress.Range backgroundColor={colors.RIGHT} />
-            </ChakraProgress.Track>
-            <ChakraProgress.ValueText>{iterationsProgress.toFixed(2)}%</ChakraProgress.ValueText>
-        </HStack>
+  return (
+    <ChakraProgress.Root
+      paddingInline={5}
+      size="lg"
+      animated
+      value={iterationsProgress}
+      maxW="sm"
+      width="100%"
+    >
+      <HStack gap="5">
+        <ChakraProgress.Label>
+          {triangles} / {maxTriangles}
+        </ChakraProgress.Label>
+        <ChakraProgress.Track backgroundColor={colors.TERTIARY} flex="1">
+          <ChakraProgress.Range backgroundColor={colors.PRIMARY} />
+        </ChakraProgress.Track>
+        <ChakraProgress.ValueText>
+          {iterationsProgress.toFixed(2)}%
+        </ChakraProgress.ValueText>
+      </HStack>
     </ChakraProgress.Root>
+  );
 }

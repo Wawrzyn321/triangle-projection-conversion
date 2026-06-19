@@ -11,7 +11,7 @@ export function Header() {
       w="100%"
       height={HEADER_HEIGHT}
       justify="center"
-      background={`linear-gradient(0deg, ${colors.BACKGROUND_GRADIENT}, ${colors.BACKGROUND})`}
+      background={`linear-gradient(0deg, ${colors.BACKGROUND_ACCENT}, ${colors.BACKGROUND})`}
     >
       <Flex
         paddingInline={3}
@@ -23,9 +23,14 @@ export function Header() {
           <Heading display="inline">3D Projection lab</Heading>
           <Image src="/logo.svg" role="presentation" htmlWidth="40px" />
         </Link>
-        <Link href="/info">
-          <Text>How it works</Text>
-        </Link>
+        <Flex gap={4}>
+          <Link href="/info">
+            <Text>How it works</Text>
+          </Link>
+          <Link href="/vote">
+            <Text>Vote for features</Text>
+          </Link>
+        </Flex>
       </Flex>
     </Flex>
   );

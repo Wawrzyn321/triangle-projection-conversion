@@ -41,7 +41,6 @@ export async function algo({
   );
 
   const triangles = removeFlatTriangles(trianglesPre, viewProjectionMatrix);
-  console.log(trianglesPre.length, triangles.length);
   const progressData: ProgressData = {
     iterationsProgress: 0,
     maxTriangles: triangles.length,

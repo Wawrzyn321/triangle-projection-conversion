@@ -1,5 +1,3 @@
-https://roughjs.com/
-
 1. AWS Lambda payload limit
    Synchronous invoke request payload: ~6 MB
    Response also has limits (same order of magnitude)
@@ -32,13 +30,15 @@ or deploys “maintenance mode” version
 ✔ stops all incoming traffic instantly
 
 STRONKA
-wygląd
 terraform
 aws domena
 aws s3 static hosting
 aws inne
 
-LEDY
-symulacja w threeJS
-odpalenie max7219
-ledy inne
+voting!
+
+ograniczenie wierzhocłków
+
+czcionka
+
+black theme

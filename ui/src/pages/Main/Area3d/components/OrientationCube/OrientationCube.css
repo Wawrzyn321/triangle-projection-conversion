@@ -1,56 +1,15 @@
-.App {
-  text-align: center;
-}
-
-#canvas-container {
-  height: 100%;
-  width: 100%;
-  background: #ddd;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
+:root {
+  --cube-size: 100px;
+  --cube-offset: calc(var(--cube-size) / -2);
 }
 
 #viewcube-container {
-  width: 120px;
-  height: 120px;
+  width: var(--cube-size);
+  height: var(--cube-size);
   margin: 10px;
   perspective: 600px;
   position: absolute;
-  right: 60px;
+  right: 20px;
   bottom: 40px;
   z-index: 2;
 }
@@ -69,11 +28,11 @@
   justify-content: center;
   align-items: center;
   position: absolute;
-  width: 120px;
-  height: 120px;
+  width: var(--cube-size);
+  height: var(--cube-size);
   border: 2px solid #808080;
   line-height: 100px;
-  font-size: 25px;
+  font-size: 20px;
   font-weight: bold;
   color: #7d7d7d;
   text-align: center;
@@ -89,25 +48,27 @@
 }
 
 .cube__face--top {
-  transform: rotateY(0deg) rotateX(90deg) translateZ(-60px);
+  transform: rotateY(0deg) rotateX(90deg) translateZ(var(--cube-offset));
 }
 
 .cube__face--bottom {
-  transform: rotateX(270deg) translateZ(-60px);
+  transform: rotateX(270deg) translateZ(var(--cube-offset));
 }
 
 .cube__face--left {
-  transform: rotateY(-90deg) rotateX(180deg) rotateZ(0deg) translateZ(-60px);
+  transform: rotateY(-90deg) rotateX(180deg) rotateZ(0deg)
+    translateZ(var(--cube-offset));
 }
 
 .cube__face--right {
-  transform: rotateY(90deg) rotateX(180deg) rotateZ(0deg) translateZ(-60px);
+  transform: rotateY(90deg) rotateX(180deg) rotateZ(0deg)
+    translateZ(var(--cube-offset));
 }
 
 .cube__face--front {
-  transform: rotateX(180deg) translateZ(-60px);
+  transform: rotateX(180deg) translateZ(var(--cube-offset));
 }
 
 .cube__face--back {
-  transform: rotateZ(180deg) translateZ(-60px);
+  transform: rotateZ(180deg) translateZ(var(--cube-offset));
 }

@@ -1,4 +1,4 @@
-import { Box, Button, Flex } from '@chakra-ui/react';
+import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import * as THREE from 'three';
 import { Camera } from './Camera';
@@ -10,7 +10,7 @@ import { getScaledTriangles } from './utils/getScaledTriangles';
 import { setupControls } from './utils/setupControls';
 
 import type { WorldOpts } from './types';
-import type { ProgressData } from '../types';
+import type { AlgoReturn, ProgressData } from '../types';
 
 import { Progress } from './components/Progress';
 import { OrientationCube } from './components/OrientationCube/OrientationCube';
@@ -19,38 +19,56 @@ import { FileSelectOverlay } from './components/FileSelectOverlay';
 import { useHandleLoadModel } from './hooks/useHandleLoadModel';
 import { useExecute } from './hooks/useExecute';
 
-export function Area3d({
-  canvasRef,
-}: {
-  canvasRef: RefObject<HTMLCanvasElement | null>;
-}) {
+type Props = {
+  setResult: (result: AlgoReturn) => void;
+};
+
+export function Area3d({ setResult }: Props) {
   const rendererRef = useRef<HTMLDivElement | null>(null);
   const worldOpts = useRef<WorldOpts>(null);
   const vcControllerRef = useRef<ViewCubeController>(null);
   const vcCubeRef = useRef<HTMLDivElement>(null);
   const [progressData, setProgressData] = useState<ProgressData | null>(null);
 
-  const { modelRef, modelLoaded, handleLoadModel } =
-    useHandleLoadModel(worldOpts);
+  const {
+    modelRef,
+    modelLoaded,
+    handleLoadModel,
+    handleClearModel,
+    maxDimension,
+    otherDim,
+  } = useHandleLoadModel(worldOpts);
 
-  const [isExecuting, execute] = useExecute(worldOpts, canvasRef, setProgressData);
+  const [isExecuting, execute] = useExecute(worldOpts, setProgressData);
 
   useEffect(() => {
     const rendererTarget = rendererRef.current;
-    if (!rendererTarget) return;
+    if (!rendererTarget) {
+      throw Error('Area3d: no rendererTarget');
+    }
 
-    const cleanup = createScene(rendererTarget, worldOpts, vcControllerRef, vcCubeRef);
+    const cleanup = createScene(
+      rendererTarget,
+      worldOpts,
+      vcControllerRef,
+      vcCubeRef,
+    );
 
     return cleanup;
   }, []);
 
-  function executeModel() {
+  async function executeModel() {
     const model = modelRef.current;
     if (!model) {
       throw Error('executeModel: model is null');
     }
-
-    execute(getScaledTriangles(model));
+    console.log({ maxDimension, otherDim });
+    const result = await execute(
+      getScaledTriangles(model),
+      ((maxDimension / 10) * 2) / otherDim,
+    );
+    console.log(result);
+    setResult(result);
   }
 
   return (
@@ -64,25 +82,42 @@ export function Area3d({
             cubeRef={vcCubeRef}
           />
         )}
-        <Flex columnGap={2} alignItems='center'>
-          <Progress progressData={progressData} />
-          <Button
-            marginLeft="auto"
-            backgroundColor={colors.RIGHT}
-            disabled={!modelLoaded || isExecuting}
-            onClick={executeModel}
-          >
-            Project
-          </Button>
+        <Flex columnGap={2} alignItems="center">
+          {modelLoaded && <Progress progressData={progressData} />}
+          <Box marginLeft="auto" columnGap={1} display="flex">
+            {modelLoaded && (
+              <Button
+                backgroundColor={colors.SECONDARY}
+                onClick={handleClearModel}
+              >
+                Clear
+              </Button>
+            )}
+            <Button
+              backgroundColor={colors.PRIMARY}
+              disabled={!modelLoaded || isExecuting}
+              onClick={executeModel}
+            >
+              Project
+            </Button>
+          </Box>
         </Flex>
       </Box>
+      <Text fontWeight="light" fontStyle="italic" marginInline={1}>
+        Tip: For best results, make the model fill the viewport.
+      </Text>
     </Box>
   );
 }
 
-function createScene(rendererTarget: HTMLDivElement, worldOpts: RefObject<WorldOpts | null>, vcControllerRef: RefObject<ViewCubeController | null>, vcCubeRef: RefObject<HTMLDivElement | null>) {
+function createScene(
+  rendererTarget: HTMLDivElement,
+  worldOpts: RefObject<WorldOpts | null>,
+  vcControllerRef: RefObject<ViewCubeController | null>,
+  vcCubeRef: RefObject<HTMLDivElement | null>,
+) {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(colors.BACKGROUND_GRADIENT);
+  scene.background = new THREE.Color(colors.BACKGROUND_ACCENT);
 
   const width = rendererTarget.clientWidth;
   const height = rendererTarget.clientHeight;
@@ -130,6 +165,7 @@ function createScene(rendererTarget: HTMLDivElement, worldOpts: RefObject<WorldO
 
   worldOpts.current = {
     camera,
+    controls,
     renderer,
     scene,
   };

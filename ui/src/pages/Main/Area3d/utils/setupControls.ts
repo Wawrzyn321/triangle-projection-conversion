@@ -7,9 +7,15 @@ export function setupControls(
 ) {
   const controls = new OrbitControls(camera, renderer.domElement);
 
+  resetControls(controls, camera);
+
+  return controls;
+}
+
+export function resetControls(controls: OrbitControls, camera: THREE.Camera) {
+  controls.enablePan = false;
+
   camera.position.set(0, 0, 8);
   controls.target.set(0, 0, 0);
   controls.update();
-
-  return controls;
 }

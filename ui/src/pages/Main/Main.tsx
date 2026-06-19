@@ -1,15 +1,16 @@
-import { useRef } from 'react';
+import { useState } from 'react';
 import { Area2d } from './Area2d';
 import { Area3d } from './Area3d/Area3d';
 import { MainLayout } from './MainLayout';
+import type { AlgoReturn } from './types';
 
 export function Main() {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const [result, setResult] = useState<AlgoReturn | null>(null);
 
   return (
     <MainLayout>
-      <Area3d canvasRef={canvasRef} />
-      <Area2d canvasRef={canvasRef} />
+      <Area3d setResult={setResult} />
+      <Area2d result={result} />
     </MainLayout>
   );
 }

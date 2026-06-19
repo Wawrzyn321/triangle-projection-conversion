@@ -1,5 +1,5 @@
 import { colors } from '@/colors';
-import { Flex } from '@chakra-ui/react';
+import { Flex, Text } from '@chakra-ui/react';
 
 const FOOTER_HEIGHT = '60px';
 
@@ -12,9 +12,9 @@ export function Footer() {
       as="footer"
       height={FOOTER_HEIGHT}
       justify="center"
-      background={`linear-gradient(180deg, ${colors.BACKGROUND_GRADIENT}, ${colors.BACKGROUND})`}
+      background={`linear-gradient(180deg, ${colors.BACKGROUND_ACCENT}, ${colors.BACKGROUND})`}
     >
-      IDK this is footer
+      <Text fontStyle='italic'>Summer 2026</Text>
     </Flex>
   );
 }

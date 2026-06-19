@@ -1,5 +1,26 @@
 import type { AlgoReturn } from '@/pages/Main/types';
 import * as THREE from 'three';
+import rough from 'roughjs';
+
+export function drawFromSegmentsRough(
+  canvas: HTMLCanvasElement | null,
+  data: AlgoReturn,
+) {
+  const ctx = canvas?.getContext('2d');
+  if (!ctx) throw Error('drawFromSegments::no canvas context');
+
+  ctx.clearRect(0, 0, canvas!.width, canvas!.height);
+
+  const rc = rough.canvas(canvas!);
+
+  for (const triangle of data.triangles) {
+    for (const edge of triangle.edges) {
+      for (const segment of edge.edgeSegments2d) {
+        rc.line(segment[0].x, segment[0].y, segment[1].x, segment[1].y);
+      }
+    }
+  }
+}
 
 export function drawFromSegments(
   canvas: HTMLCanvasElement | null,
@@ -7,7 +28,7 @@ export function drawFromSegments(
   debugs = false,
 ) {
   const ctx = canvas?.getContext('2d');
-  if (!ctx) throw Error('BRZYDKO');
+  if (!ctx) throw Error('drawFromSegments::no canvas context');
 
   ctx.clearRect(0, 0, canvas!.width, canvas!.height);
 

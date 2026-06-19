@@ -3,15 +3,27 @@ import { Footer } from './Footer';
 import { Header } from './Header';
 import { Main } from '@/pages/Main/Main';
 import { Info } from '@/pages/Info/Info';
+import { Vote } from '@/pages/Vote/Vote';
 
 export function PageLayout() {
-  const renderMainPage = window.location.pathname !== '/info';
-
   return (
     <VStack minH="100vh" rowGap={10}>
       <Header />
-      {renderMainPage ? <Main /> : <Info />}
+      <Router />
       <Footer />
     </VStack>
   );
+}
+
+function Router() {
+  const { pathname } = window.location;
+
+  switch (pathname) {
+    case '/info':
+      return <Info />;
+    case '/vote':
+      return <Vote />;
+    default:
+      return <Main />;
+  }
 }

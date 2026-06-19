@@ -1,17 +1,17 @@
-import { getModelBBSize } from '../utils/getModelBBSize';
+// import { getModelBBSize } from '../utils/getModelBBSize';
 import * as THREE from 'three';
-import { BASE_SCALE } from '../const';
+// import { BASE_SCALE } from '../const';
 
 export function getScaledTriangles(model: THREE.Mesh) {
   const triangles = meshToWorldTriangles(model);
-  const size = getModelBBSize(model);
-  const scale = BASE_SCALE / Math.max(size.x, size.y, size.z);
+  // const size = getModelBBSize(model);
+  // const scale = BASE_SCALE / Math.max(size.x, size.y, size.z);
 
-  for (const triangle of triangles) {
-    for (let i = 0; i < 9; i++) {
-      triangle[i] *= scale;
-    }
-  }
+  // for (const triangle of triangles) {
+  //   for (let i = 0; i < 9; i++) {
+  //     // triangle[i] *= scale;
+  //   }
+  // }
   return triangles;
 }
 
