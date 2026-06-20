@@ -6,8 +6,8 @@ import ViewCubeController from '@/vendor/three-viewcube';
 
 import { getScaledTriangles } from './utils/getScaledTriangles';
 
-import type { WorldOpts } from './types';
-import type { AlgoReturn, ProgressData } from '../types';
+import type { AlgoReturnWithName, WorldOpts } from './types';
+import type { ProgressData } from '../types';
 
 import { Progress } from './components/Progress/Progress';
 import { OrientationCube } from './components/OrientationCube/OrientationCube';
@@ -19,7 +19,7 @@ import { createScene } from './createScene';
 import { BOTTOM_BAR_HEIGHT } from './const';
 
 type Props = {
-  setResult: (result: AlgoReturn) => void;
+  setResult: (result: AlgoReturnWithName) => void;
 };
 
 export function Area3d({ setResult }: Props) {
@@ -37,6 +37,7 @@ export function Area3d({ setResult }: Props) {
     handleClearModel,
     maxDimension,
     scalingFactor,
+    fileName,
   } = useHandleLoadModel(worldOpts);
 
   const [isExecuting, execute] = useExecute(worldOpts, setProgressData);
@@ -76,7 +77,7 @@ export function Area3d({ setResult }: Props) {
       maxDimension,
       scalingFactor,
     );
-    setResult(result);
+    setResult({ ...result, fileName });
   }
 
   return (
@@ -119,7 +120,8 @@ export function Area3d({ setResult }: Props) {
         </Flex>
       </Box>
       <Text fontWeight="light" fontStyle="italic" margin={1}>
-        Tip: For best results, make the model fill the viewport.
+        Tip: For best results, make the model fill the viewport. The physical
+        size will remain unchanged.
       </Text>
     </Box>
   );

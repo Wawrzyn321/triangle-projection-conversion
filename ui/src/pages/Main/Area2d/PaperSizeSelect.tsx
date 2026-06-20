@@ -21,8 +21,7 @@ type Props = {
 
 export function PaperSizeSelect({ size, setSize }: Props) {
   return (
-    <Flex justify="space-between">
-      {size.height} x {size.width}mm
+    <Flex padding={1}>
       <select
         name="paper-size"
         onChange={e =>
@@ -31,7 +30,9 @@ export function PaperSizeSelect({ size, setSize }: Props) {
         value={size.name}
       >
         {SIZE_PRESETS.map(preset => (
-          <option key={preset.name}>{preset.name}</option>
+          <option key={preset.name} value={preset.name}>
+            {preset.name} ({size.height} x {size.width}mm)
+          </option>
         ))}
       </select>
     </Flex>

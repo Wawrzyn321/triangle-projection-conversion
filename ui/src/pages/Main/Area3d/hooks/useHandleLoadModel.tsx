@@ -11,6 +11,7 @@ import { resetControls } from '../utils/setupControls';
 export function useHandleLoadModel(opts: RefObject<WorldOpts | null>) {
   const [modelLoaded, setModelLoaded] = useState(false);
   const [maxDimension, setMaxDimension] = useState(0);
+  const [fileName, setFileName] = useState('');
   const [scalingFactor, setScalingFactor] = useState(0);
   const modelRef = useRef<null | THREE.Mesh>(null);
 
@@ -47,6 +48,7 @@ export function useHandleLoadModel(opts: RefObject<WorldOpts | null>) {
     model.scale.set(scale, scale, scale);
 
     setModelLoaded(true);
+    setFileName(withoutExtension(file.name));
   };
 
   const handleClearModel = () => {
@@ -67,6 +69,7 @@ export function useHandleLoadModel(opts: RefObject<WorldOpts | null>) {
     handleLoadModel,
     handleClearModel,
     maxDimension,
+    fileName,
     scalingFactor,
   };
 }
@@ -86,4 +89,8 @@ function getScalingFactor(dimension: number, min: number, max: number) {
     maxIterations++;
   }
   return scalingFactor;
+}
+
+function withoutExtension(name: string) {
+  return name.substring(0, name.lastIndexOf('.'));
 }

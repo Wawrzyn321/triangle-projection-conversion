@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import type { AlgoReturn, ProgressData } from '../../types';
 import type { WorldOpts } from './../types';
 import { BASE_SCALE } from '../const';
+import { point2dIterator, segment2dIterator } from '../../iterators';
 
 const MM_PER_CM = 10;
 
@@ -51,7 +52,7 @@ export function useExecute(
       frustumHalfH,
       physicalScale * scalingFactor,
     );
-    return topLeftAlign(mmData);
+    return topLeftAlign(mmData, 10);
   }
 
   return [isExecuting, execute] as const;
@@ -81,29 +82,30 @@ function applyClipToMm(
   };
 }
 
-function topLeftAlign(data: AlgoReturn): AlgoReturn {
+function topLeftAlign(data: AlgoReturn, margin: number): AlgoReturn {
   let minX = Infinity,
     minY = Infinity;
 
-  for (const triangle of data.triangles)
-    for (const edge of triangle.edges)
-      for (const segment of edge.edgeSegments2d)
-        for (const pt of segment) {
-          if (pt.x < minX) minX = pt.x;
-          if (pt.y < minY) minY = pt.y;
-        }
+  for (const pt of point2dIterator(data)) {
+    if (pt.x < minX) minX = pt.x;
+    if (pt.y < minY) minY = pt.y;
+  }
 
   const shift = (pt: THREE.Vector2) => {
-    pt.x -= minX;
-    pt.y -= minY;
+    pt.x -= minX - margin;
+    pt.y -= minY - margin;
   };
 
-  for (const triangle of data.triangles)
-    for (const edge of triangle.edges)
-      for (const segment of edge.edgeSegments2d) segment.forEach(shift);
+  for (const segment of segment2dIterator(data)) {
+    segment.forEach(shift);
+  }
 
-  for (const segment of data.debugLines) segment.forEach(shift);
-  for (const pt of data.debugPoints) shift(pt);
+  for (const segment of data.debugLines) {
+    segment.forEach(shift);
+  }
+  for (const pt of data.debugPoints) {
+    shift(pt);
+  }
 
   return data;
 }

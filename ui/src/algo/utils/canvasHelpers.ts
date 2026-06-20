@@ -1,6 +1,7 @@
 import type { AlgoReturn } from '@/pages/Main/types';
 import * as THREE from 'three';
 import rough from 'roughjs';
+import { point2dIterator, segment2dIterator } from '@/pages/Main/iterators';
 
 export function drawFromSegmentsRough(
   canvas: HTMLCanvasElement | null,
@@ -13,34 +14,31 @@ export function drawFromSegmentsRough(
 
   const rc = rough.canvas(canvas!);
 
-  for (const triangle of data.triangles) {
-    for (const edge of triangle.edges) {
-      for (const segment of edge.edgeSegments2d) {
-        rc.line(segment[0].x, segment[0].y, segment[1].x, segment[1].y);
-      }
-    }
+  for (const segment of segment2dIterator(data)) {
+    rc.line(segment[0].x, segment[0].y, segment[1].x, segment[1].y);
   }
 }
 
 export function drawFromSegments(
   canvas: HTMLCanvasElement | null,
   data: AlgoReturn,
+  scale = { x: 1, y: 1 },
   debugs = false,
 ) {
   const ctx = canvas?.getContext('2d');
   if (!ctx) throw Error('drawFromSegments::no canvas context');
 
   ctx.clearRect(0, 0, canvas!.width, canvas!.height);
+  ctx.save();
+  ctx.scale(scale.x, scale.y);
 
-  ctx.lineWidth = 1;
+  const mainScale = Math.max(scale.x, scale.y);
+
+  ctx.lineWidth = 1 / mainScale;
   ctx.strokeStyle = 'black';
 
-  for (const triangle of data.triangles) {
-    for (const edge of triangle.edges) {
-      for (const segment of edge.edgeSegments2d) {
-        drawLine(ctx, segment[0], segment[1]);
-      }
-    }
+  for (const segment of segment2dIterator(data)) {
+    drawLine(ctx, segment[0], segment[1]);
   }
 
   if (debugs) {
@@ -54,12 +52,85 @@ export function drawFromSegments(
       drawPoint(ctx, point);
     }
   }
+
+  drawScale(ctx, data, mainScale);
+
+  ctx.restore();
+}
+
+export function drawScale(
+  ctx: CanvasRenderingContext2D,
+  data: AlgoReturn,
+  scale: number,
+) {
+  const SPACING = 5; //mm
+  const POINT_LINE_HALF_WIDTH = SPACING / 3;
+  const FONT_SIZE = (10 / scale) * 1.8;
+
+  let minX = Infinity,
+    minY = Infinity,
+    maxX = -Infinity,
+    maxY = -Infinity;
+
+  for (const pt of point2dIterator(data)) {
+    if (pt.x < minX) minX = pt.x;
+    if (pt.y < minY) minY = pt.y;
+    if (pt.x > maxX) maxX = pt.x;
+    if (pt.y > maxY) maxY = pt.y;
+  }
+
+  ctx.strokeStyle = 'gray';
+  drawLine(ctx, { x: minX, y: maxY + SPACING }, { x: maxX, y: maxY + SPACING });
+  {
+    const tY = maxY + SPACING;
+    drawLine(
+      ctx,
+      { x: minX, y: tY - POINT_LINE_HALF_WIDTH },
+      { x: minX, y: tY + POINT_LINE_HALF_WIDTH },
+    );
+    drawLine(
+      ctx,
+      { x: maxX, y: tY - POINT_LINE_HALF_WIDTH },
+      { x: maxX, y: tY + POINT_LINE_HALF_WIDTH },
+    );
+  }
+
+  drawLine(ctx, { x: maxX + SPACING, y: minY }, { x: maxX + SPACING, y: maxY });
+  {
+    const tX = maxX + SPACING;
+    drawLine(
+      ctx,
+      { x: tX - POINT_LINE_HALF_WIDTH, y: minY },
+      { x: tX + POINT_LINE_HALF_WIDTH, y: minY },
+    );
+    drawLine(
+      ctx,
+      { x: tX - POINT_LINE_HALF_WIDTH, y: maxY },
+      { x: tX + POINT_LINE_HALF_WIDTH, y: maxY },
+    );
+  }
+
+  ctx.fillStyle = 'gray';
+  ctx.font = `${FONT_SIZE}px serif`;
+
+  const width = (maxX - minX).toFixed(2) + 'mm';
+  ctx.textAlign = 'center';
+  ctx.fillText(
+    width,
+    minX + (maxX - minX) / 2 + SPACING * 2,
+    maxY + SPACING * 4,
+  );
+
+  const height = (maxY - minY).toFixed(2) + 'mm';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(height, maxX + SPACING * 2, minY + (maxY - minY) / 2);
 }
 
 function drawLine(
   ctx: CanvasRenderingContext2D,
-  pointA: THREE.Vector2,
-  pointB: THREE.Vector2,
+  pointA: THREE.Vector2Like,
+  pointB: THREE.Vector2Like,
   withHead = false,
 ) {
   ctx.beginPath();
