@@ -80,13 +80,13 @@ function getScalingFactor(dimension: number, min: number, max: number) {
   while (dimension > max && maxIterations > 0) {
     dimension /= 10;
     scalingFactor /= 10;
-    maxIterations++;
+    maxIterations--;
   }
   maxIterations = 10;
   while (dimension < min && maxIterations > 0) {
     dimension *= 10;
     scalingFactor *= 10;
-    maxIterations++;
+    maxIterations--;
   }
   return scalingFactor;
 }

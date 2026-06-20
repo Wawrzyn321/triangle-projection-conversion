@@ -8,7 +8,7 @@ export const FEATURES = [
   {
     name: 'Improved projection algorithm',
     description:
-      'Finalize better algoriithm to work faster and more accurate, without vertex number restriction.',
+      'Finalize better algorithm to work faster and more accurate, without vertex number restriction.',
     key: 'improve-algo',
   },
   {

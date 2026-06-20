@@ -19,9 +19,9 @@ export function Info() {
           converted to a plain image, without the data about vertices and edges.
         </Paragraph>
         <Paragraph>
-          Here instead the representation is calculated based on calculated
-          based on the geometry and coverted into lines, which in turn can be
-          easily scaled and converted to other formats, such as SVG.
+          Here instead the representation is calculated based on the geometry
+          and converted into lines, which in turn can be easily scaled and
+          converted to other formats, such as SVG.
         </Paragraph>
       </Section>
 
@@ -52,7 +52,7 @@ export function Info() {
           due to numerical errors some artifacts may appear.
         </Paragraph>
         <Paragraph>
-          I'm working on a updated version that will be more accurate - if you
+          I'm working on an updated version that will be more accurate - if you
           think it will be useful for you, please give it a vote at{' '}
           <Link textIndent={0} textDecoration="underline" href="/vote">
             voting page

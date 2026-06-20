@@ -1,4 +1,4 @@
-import { useColors } from '@/colors';
+import { useColors } from '@/useColors';
 import { Center, Button, Text } from '@chakra-ui/react';
 import React, { useRef, useState, type ChangeEvent } from 'react';
 import { BOTTOM_BAR_HEIGHT } from '../const';

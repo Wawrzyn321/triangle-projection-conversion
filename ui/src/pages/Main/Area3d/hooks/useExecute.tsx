@@ -26,33 +26,40 @@ export function useExecute(
     const { camera } = worldOpts.current;
 
     setExecuting(true);
-    const nextTris = removeOccludedTris(inputTriangles, camera.threeCamera);
+    try {
+      const nextTris = removeOccludedTris(inputTriangles, camera.threeCamera);
 
-    const viewProjectionMatrix = new THREE.Matrix4().multiplyMatrices(
-      camera.threeCamera.projectionMatrix,
-      camera.threeCamera.matrixWorldInverse,
-    );
+      const viewProjectionMatrix = new THREE.Matrix4().multiplyMatrices(
+        camera.threeCamera.projectionMatrix,
+        camera.threeCamera.matrixWorldInverse,
+      );
 
-    const data = await algo({
-      inputTriangles: nextTris,
-      viewProjectionMatrix,
-      callback: data => setProgressData({ ...data }),
-    });
+      const data = await algo({
+        inputTriangles: nextTris,
+        viewProjectionMatrix,
+        callback: data => setProgressData({ ...data }),
+      });
 
-    setExecuting(false);
+      const zoom = camera.threeCamera.zoom;
+      const frustumHalfH = camera.threeCamera.top / zoom;
+      const frustumHalfW = camera.threeCamera.right / zoom;
+      const physicalScale = (maxDimension / BASE_SCALE) * MM_PER_CM;
 
-    const zoom = camera.threeCamera.zoom;
-    const frustumHalfH = camera.threeCamera.top / zoom;
-    const frustumHalfW = camera.threeCamera.right / zoom;
-    const physicalScale = (maxDimension / BASE_SCALE) * MM_PER_CM;
+      const mmData = applyClipToMm(
+        data,
+        frustumHalfW,
+        frustumHalfH,
+        physicalScale * scalingFactor,
+      );
+      topLeftAlign(mmData, 10);
+      return mmData;
+    } catch (e) {
+      console.log(e);
+      alert('something unexpected happened');
+    } finally {
+      setExecuting(false);
 
-    const mmData = applyClipToMm(
-      data,
-      frustumHalfW,
-      frustumHalfH,
-      physicalScale * scalingFactor,
-    );
-    return topLeftAlign(mmData, 10);
+    }
   }
 
   return [isExecuting, execute] as const;
@@ -82,7 +89,7 @@ function applyClipToMm(
   };
 }
 
-function topLeftAlign(data: AlgoReturn, margin: number): AlgoReturn {
+function topLeftAlign(data: AlgoReturn, margin: number) {
   let minX = Infinity,
     minY = Infinity;
 
@@ -106,6 +113,4 @@ function topLeftAlign(data: AlgoReturn, margin: number): AlgoReturn {
   for (const pt of data.debugPoints) {
     shift(pt);
   }
-
-  return data;
 }

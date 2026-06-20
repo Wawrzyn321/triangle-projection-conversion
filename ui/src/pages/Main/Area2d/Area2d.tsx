@@ -1,7 +1,7 @@
 import { AspectRatio } from '@chakra-ui/react';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { drawFromSegments } from '@/algo/utils/canvasHelpers';
-import { useColors } from '@/colors';
+import { drawFromSegments, clearCanvas } from '@/algo/utils/canvasHelpers';
+import { useColors } from '@/useColors';
 import { SIZE_PRESETS, type SizePreset } from './PaperSizeSelect';
 import { Translator } from './Translator';
 import { BottomPanel } from './BottomPanel';
@@ -39,6 +39,8 @@ export function Area2d({ result }: Props) {
     if (result) {
       redraw();
       setShift({ x: 0, y: 0 });
+    } else {
+      clearCanvas(canvasRef.current);
     }
   }, [result, size]);
 
@@ -67,7 +69,7 @@ export function Area2d({ result }: Props) {
         backgroundColor={colors.PAPER}
       >
         <div id="aspect-ratio-receiver">
-          <Translator setShift={setShift}>
+          <Translator setShift={setShift} interactive={!!result}>
             <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
               <canvas ref={canvasRef} style={canvasStyle}></canvas>
             </div>

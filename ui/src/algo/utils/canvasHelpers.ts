@@ -152,3 +152,10 @@ function drawPoint(ctx: CanvasRenderingContext2D, point: THREE.Vector2) {
   ctx.arc(point.x, point.y, 3, 0, 2 * Math.PI);
   ctx.fill();
 }
+
+export function clearCanvas(canvas: HTMLCanvasElement | null) {
+  const ctx = canvas?.getContext('2d');
+  if (!ctx) throw Error('drawFromSegments::no canvas context');
+
+  ctx.clearRect(0, 0, canvas!.width, canvas!.height);
+}

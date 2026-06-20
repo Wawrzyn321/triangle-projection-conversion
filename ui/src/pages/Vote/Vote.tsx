@@ -11,8 +11,10 @@ export function Vote() {
   const [existingVote, setExistingVote] = useState(() => getVote());
 
   async function handleVote(key: (typeof FEATURES)[number]['key']) {
-    saveVote(key);
     setExistingVote(key);
+    if (saveVote(key)) {
+      alert('todo request');
+    }
   }
 
   return (

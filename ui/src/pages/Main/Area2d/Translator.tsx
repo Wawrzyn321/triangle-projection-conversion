@@ -13,9 +13,10 @@ type Props = PropsWithChildren<{
       y: number;
     }>
   >;
+  interactive: boolean;
 }>;
 
-export function Translator({ setShift, children }: Props) {
+export function Translator({ setShift, children, interactive }: Props) {
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(
     null,
   );
@@ -48,6 +49,8 @@ export function Translator({ setShift, children }: Props) {
       onMouseDown={e => setMousePos(getMousePosition(e))}
       onMouseMove={handleMouseMove}
       onMouseUp={() => setMousePos(null)}
+      onMouseLeave={() => setMousePos(null)}
+      cursor={interactive ? 'move' : 'disabled'}
     >
       {children}
     </Box>

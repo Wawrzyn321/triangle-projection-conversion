@@ -31,7 +31,7 @@ export function PaperSizeSelect({ size, setSize }: Props) {
       >
         {SIZE_PRESETS.map(preset => (
           <option key={preset.name} value={preset.name}>
-            {preset.name} ({size.height} x {size.width}mm)
+            {preset.name} ({preset.height} x {preset.width}mm)
           </option>
         ))}
       </select>

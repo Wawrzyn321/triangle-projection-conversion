@@ -1,10 +1,10 @@
 import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
-import { useColors } from '@/colors';
+import { useColors } from '@/useColors';
 import * as THREE from 'three';
 import ViewCubeController from '@/vendor/three-viewcube';
 
-import { getScaledTriangles } from './utils/getScaledTriangles';
+import { meshToWorldTriangles } from './utils/meshToWorldTriangles';
 
 import type { AlgoReturnWithName, WorldOpts } from './types';
 import type { ProgressData } from '../types';
@@ -19,7 +19,7 @@ import { createScene } from './createScene';
 import { BOTTOM_BAR_HEIGHT } from './const';
 
 type Props = {
-  setResult: (result: AlgoReturnWithName) => void;
+  setResult: (result: AlgoReturnWithName | null) => void;
 };
 
 export function Area3d({ setResult }: Props) {
@@ -73,11 +73,13 @@ export function Area3d({ setResult }: Props) {
       throw Error('executeModel: model is null');
     }
     const result = await execute(
-      getScaledTriangles(model),
+      meshToWorldTriangles(model),
       maxDimension,
       scalingFactor,
     );
-    setResult({ ...result, fileName });
+    if (result) {
+      setResult({ ...result, fileName });
+    }
   }
 
   return (
@@ -100,7 +102,10 @@ export function Area3d({ setResult }: Props) {
                   colors.theme === 'dark' ? colors.PRIMARY : colors.SECONDARY
                 }
                 disabled={isExecuting}
-                onClick={handleClearModel}
+                onClick={() => {
+                  handleClearModel();
+                  setResult(null);
+                }}
                 color={colors.WHITE}
               >
                 Clear

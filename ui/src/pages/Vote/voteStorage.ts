@@ -9,19 +9,18 @@ function isStorageAvailable() {
 }
 
 export function getVote() {
-  const STORAGE_UNAVAILABLE = 'STORAGE_UNAVAILABLE';
-
   if (!isStorageAvailable()) {
-    return STORAGE_UNAVAILABLE;
+    return null;
   }
 
   return localStorage.getItem(VOTE_STORAGE_KEY);
 }
 
 export function saveVote(vote: string) {
-  if (!isStorageAvailable() || !!getVote()) {
-    return;
+  if (!!getVote()) {
+    return false;
   }
 
   localStorage.setItem(VOTE_STORAGE_KEY, vote);
+  return true;
 }

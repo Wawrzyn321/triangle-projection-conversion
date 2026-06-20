@@ -1,4 +1,4 @@
-import { useColors } from '@/colors';
+import { useColors } from '@/useColors';
 import { Image, Flex, Heading, Text, Link } from '@chakra-ui/react';
 import { ColorModeButton } from './ui/color-mode';
 
