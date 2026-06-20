@@ -4,17 +4,38 @@ import type { AlgoReturnWithName } from '../Area3d/types';
 import { downloadFile } from './downloadFile';
 import { createSvg } from './createSvg';
 
+import type { SizePreset } from './PaperSizeSelect';
+import { segment2dIterator } from '../iterators';
+
 type Props = {
   result: AlgoReturnWithName | null;
+  format: SizePreset['name'];
 };
 
-export function Export({ result }: Props) {
+export function Export({ result, format }: Props) {
   const menuItems = [
     {
       label: '.pdf',
       value: 'pdf',
-      handleClick: () => {
+      handleClick: async () => {
         if (!result) return;
+
+        try {
+          const { jsPDF } = await import('jspdf');
+
+          const doc = new jsPDF({
+            format: format.toLowerCase(),
+          });
+
+          for (const [p1, p2] of segment2dIterator(result)) {
+            doc.line(p1.x, p1.y, p2.x, p2.y);
+          }
+
+          doc.save(`${result.fileName}.pdf`);
+        } catch (e) {
+          alert('Something unexpected happened');
+          console.warn(e);
+        }
       },
     },
     {

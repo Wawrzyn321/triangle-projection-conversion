@@ -74,7 +74,12 @@ export function Area2d({ result }: Props) {
           </Translator>
         </div>
       </AspectRatio>
-      <BottomPanel size={size} setSize={setSize} result={result} />
+      <BottomPanel
+        size={size}
+        setSize={setSize}
+        result={result}
+        format={size.name}
+      />
     </div>
   );
 }

@@ -1,23 +1,6 @@
 import type { AlgoReturn } from '@/pages/Main/types';
 import * as THREE from 'three';
-import rough from 'roughjs';
 import { point2dIterator, segment2dIterator } from '@/pages/Main/iterators';
-
-export function drawFromSegmentsRough(
-  canvas: HTMLCanvasElement | null,
-  data: AlgoReturn,
-) {
-  const ctx = canvas?.getContext('2d');
-  if (!ctx) throw Error('drawFromSegments::no canvas context');
-
-  ctx.clearRect(0, 0, canvas!.width, canvas!.height);
-
-  const rc = rough.canvas(canvas!);
-
-  for (const segment of segment2dIterator(data)) {
-    rc.line(segment[0].x, segment[0].y, segment[1].x, segment[1].y);
-  }
-}
 
 export function drawFromSegments(
   canvas: HTMLCanvasElement | null,
