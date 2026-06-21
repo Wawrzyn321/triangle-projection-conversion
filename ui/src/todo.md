@@ -1,3 +1,19 @@
+PLAN
+2) GH Action gadające z S3
+3) podpięcie domeny pod ACM+CF+S3
+4) konwersja CF+ACM na terraform
+5) czy GH Action może inwalidować CF? / AWS WAF
+6) 
+
+
+- s3 
+- certificate in acm
+- cloudfront
+- lambda for feedback
+- ddb for feedback
+- api gateway
+
+
 1. AWS Lambda payload limit
    Synchronous invoke request payload: ~6 MB
    Response also has limits (same order of magnitude)

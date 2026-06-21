@@ -25,7 +25,7 @@ export function Progress({
     >
       <HStack gap="5">
         <ChakraProgress.Label whiteSpace="nowrap">
-          {triangles} / {maxTriangles}
+          {triangles} / {maxTriangles} tris
         </ChakraProgress.Label>
         <progress
           value={iterationsProgress}

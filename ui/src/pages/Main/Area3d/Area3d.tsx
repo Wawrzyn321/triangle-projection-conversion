@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Text } from '@chakra-ui/react';
+import { Box, Button, Flex } from '@chakra-ui/react';
 import { useEffect, useRef, useState } from 'react';
 import { useColors } from '@/useColors';
 import * as THREE from 'three';
@@ -17,6 +17,7 @@ import { useHandleLoadModel } from './hooks/useHandleLoadModel';
 import { useExecute } from './hooks/useExecute';
 import { createScene } from './createScene';
 import { BOTTOM_BAR_HEIGHT } from './const';
+import { Tip } from './Tip';
 
 type Props = {
   setResult: (result: AlgoReturnWithName | null) => void;
@@ -124,10 +125,7 @@ export function Area3d({ setResult }: Props) {
           </Box>
         </Flex>
       </Box>
-      <Text fontWeight="light" fontStyle="italic" margin={1}>
-        Tip: For best results, make the model fill the viewport. The physical
-        size will remain unchanged.
-      </Text>
+      <Tip hasModel={modelLoaded} />
     </Box>
   );
 }

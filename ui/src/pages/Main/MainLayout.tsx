@@ -20,7 +20,7 @@ export function MainLayout({ children }: PropsWithChildren) {
       </Box>
       <Center hideFrom="sm">
         <Heading marginTop={20} size="md">
-          Please use a larger screen
+          Please use a larger screen :(
         </Heading>
       </Center>
     </>
