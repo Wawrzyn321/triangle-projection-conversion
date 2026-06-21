@@ -1,8 +1,6 @@
-PLAN 2) GH Action gadające z S3 3) podpięcie domeny pod ACM+CF+S3 4) konwersja CF+ACM na terraform 5) czy GH Action może inwalidować CF? / AWS WAF 6)
 
-- s3
-- certificate in acm
-- cloudfront
+ 5) czy GH Action może inwalidować CF? / AWS WAF 
+
 - lambda for feedback
 - ddb for feedback
 - api gateway
@@ -38,10 +36,41 @@ or deploys “maintenance mode” version
 
 ✔ stops all incoming traffic instantly
 
-STRONKA
-terraform
-aws domena
-aws s3 static hosting
-aws inne
 
-lighthouse
+
+
+
+🚀 4. (Optional but recommended) Enable static hosting
+
+Run once (or via Terraform):
+
+S3 → Properties → Static website hosting
+Index: index.html
+
+Or Terraform:
+
+resource "aws_s3_bucket_website_configuration" "site" {
+  bucket = aws_s3_bucket.website_bucket.id
+
+  index_document {
+    suffix = "index.html"
+  }
+
+  error_document {
+    key = "index.html"
+  }
+}
+
+
+⚡ Optional upgrades
+1. Add cache headers for assets
+aws s3 sync ui/dist s3://$BUCKET \
+  --delete \
+  --cache-control "public,max-age=31536000,immutable"
+
+  2. Add CloudFront invalidation (recommended)
+- name: Invalidate CloudFront
+  run: |
+    aws cloudfront create-invalidation \
+      --distribution-id ${{ secrets.CLOUDFRONT_ID }} \
+      --paths "/*"
