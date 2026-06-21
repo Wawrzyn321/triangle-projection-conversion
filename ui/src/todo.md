@@ -1,5 +1,4 @@
-
- 5) czy GH Action może inwalidować CF? / AWS WAF 
+5.  AWS WAF
 
 - lambda for feedback
 - ddb for feedback
@@ -35,42 +34,3 @@ throttling → 0
 or deploys “maintenance mode” version
 
 ✔ stops all incoming traffic instantly
-
-
-
-
-
-🚀 4. (Optional but recommended) Enable static hosting
-
-Run once (or via Terraform):
-
-S3 → Properties → Static website hosting
-Index: index.html
-
-Or Terraform:
-
-resource "aws_s3_bucket_website_configuration" "site" {
-  bucket = aws_s3_bucket.website_bucket.id
-
-  index_document {
-    suffix = "index.html"
-  }
-
-  error_document {
-    key = "index.html"
-  }
-}
-
-
-⚡ Optional upgrades
-1. Add cache headers for assets
-aws s3 sync ui/dist s3://$BUCKET \
-  --delete \
-  --cache-control "public,max-age=31536000,immutable"
-
-  2. Add CloudFront invalidation (recommended)
-- name: Invalidate CloudFront
-  run: |
-    aws cloudfront create-invalidation \
-      --distribution-id ${{ secrets.CLOUDFRONT_ID }} \
-      --paths "/*"

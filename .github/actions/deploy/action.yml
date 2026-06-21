@@ -14,6 +14,9 @@ inputs:
   s3-bucket:
     description: S3_BUCKET
     required: true
+  cloudfront-id:
+    description: CLOUDFRONT_ID
+    required: true
 
 runs:
   using: "composite"
@@ -46,4 +49,11 @@ runs:
 
     - name: Sync to S3
       shell: bash
-      run: aws s3 sync ui/dist s3://${{ inputs.s3-bucket }} --delete
+      run: aws s3 sync ui/dist s3://${{ inputs.s3-bucket }} --delete --cache-control "public,max-age=31536000,immutable"
+
+    - name: Invalidate CloudFront
+      shell: bash
+      run: |
+        aws cloudfront create-invalidation \
+          --distribution-id ${{ inputs.cloudfront-id }} \
+          --paths "/*"
