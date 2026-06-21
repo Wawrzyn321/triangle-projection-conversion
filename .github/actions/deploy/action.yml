@@ -1,50 +1,49 @@
-name: "Deploy AF przepisy"
-description: "Deploy af-przepisy"
+name: "Deploy"
+description: "Deploy"
+
 inputs:
-  ts_authkey:
-    description: "Tailscale auth key"
+  aws-access-key-id:
+    description: AWS_ACCESS_KEY_ID
     required: true
-  ssh_key:
-    description: "SSH private key for Pi"
+  aws-secret-access-key:
+    description: AWS_SECRET_ACCESS_KEY
     required: true
+  aws-region:
+    description: AWS_REGION
+    required: true
+  s3-bucket:
+    description: S3_BUCKET
+    required: true
+
 runs:
   using: "composite"
   steps:
     - uses: actions/checkout@v4
 
-    - name: Connect to Tailscale
-      uses: tailscale/github-action@v3
+    - name: Setup Node
+      uses: actions/setup-node@v4
       with:
-        authkey: ${{ inputs.ts_authkey }}
+        node-version: 24
+        cache: npm
+        cache-dependency-path: ui/package-lock.json
 
-    - name: Setup SSH
+    - name: Install deps
+      working-directory: ui
       shell: bash
-      run: |
-        mkdir -p ~/.ssh
-        ssh-keyscan raspberrypi.tailda5b0f.ts.net >> ~/.ssh/known_hosts 2>/dev/null || true
-        echo "${{ inputs.ssh_key }}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
+      run: npm ci
 
-    - name: Copy app to Pi
+    - name: Build
+      working-directory: ui
       shell: bash
-      run: |
-        rsync -av --delete \
-          --exclude='.venv' \
-          --exclude='__pycache__' \
-          --exclude='*.pyc' \
-          --exclude='app.db' \
-          raspi-domowa/af-przepisy/ \
-          pi@raspberrypi.tailda5b0f.ts.net:/home/pi/svc/af-przepisy-new/
+      run: npm run build
 
-    - name: Deploy on Pi
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ inputs.aws-access-key-id }}
+        aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
+        aws-region: ${{ inputs.aws-region }}
+
+    - name: Sync to S3
       shell: bash
-      run: |
-        ssh -o StrictHostKeyChecking=no pi@raspberrypi.tailda5b0f.ts.net '
-          set -e
-          rm -rf /home/pi/svc/af-przepisy
-          mv /home/pi/svc/af-przepisy-new /home/pi/svc/af-przepisy
-          cd /home/pi/svc/af-przepisy
-          /home/pi/.local/bin/uv venv --python python3 --system-site-packages .venv
-          /home/pi/.local/bin/uv sync --no-dev --python python3
-          sudo systemctl restart af-przepisy
-        '
+      run: aws s3 sync ui/dist s3://${{ inputs.s3-bucket }} --delete
