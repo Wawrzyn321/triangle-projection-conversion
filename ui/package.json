@@ -7,9 +7,12 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint .",
+    "lint:check": "eslint --fix .",
     "preview": "vite preview",
     "test": "vitest",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "manual-upload": "npm run build && aws --profile personal_terraform  s3 sync ./dist s3://triangle-projection-conversion--website  --delete"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.35.0",

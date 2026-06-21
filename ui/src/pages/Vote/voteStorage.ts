@@ -17,7 +17,7 @@ export function getVote() {
 }
 
 export function saveVote(vote: string) {
-  if (!!getVote()) {
+  if (getVote()) {
     return false;
   }
 

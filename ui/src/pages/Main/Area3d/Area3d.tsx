@@ -58,6 +58,8 @@ export function Area3d({ setResult }: Props) {
     );
 
     return cleanup;
+    // for "colors" dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -66,7 +68,7 @@ export function Area3d({ setResult }: Props) {
         colors.BACKGROUND_ACCENT,
       );
     }
-  }, [colors.theme]);
+  }, [colors]);
 
   async function executeModel() {
     const model = modelRef.current;

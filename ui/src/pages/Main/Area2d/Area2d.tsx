@@ -1,5 +1,11 @@
 import { AspectRatio } from '@chakra-ui/react';
-import { useEffect, useRef, useState, type CSSProperties } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
 import { drawFromSegments, clearCanvas } from '@/algo/utils/canvasHelpers';
 import { useColors } from '@/useColors';
 import { SIZE_PRESETS, type SizePreset } from './PaperSizeSelect';
@@ -18,7 +24,7 @@ export function Area2d({ result }: Props) {
   const colors = useColors();
   const [shift, setShift] = useState({ x: 0, y: 0 });
 
-  const redraw = () => {
+  const redraw = useCallback(() => {
     if (!containerRef.current || !canvasRef.current || !result) {
       return;
     }
@@ -33,16 +39,17 @@ export function Area2d({ result }: Props) {
       y: (displayH * dpr) / Number(size.height),
     };
     drawFromSegments(canvasRef.current, result, scale);
-  };
+  }, [result, size]);
 
   useEffect(() => {
     if (result) {
       redraw();
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShift({ x: 0, y: 0 });
     } else {
       clearCanvas(canvasRef.current);
     }
-  }, [result, size]);
+  }, [result, size, redraw]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -51,7 +58,7 @@ export function Area2d({ result }: Props) {
       observer.observe(container);
       return () => observer.disconnect();
     }
-  }, []);
+  }, [redraw]);
 
   const canvasStyle: CSSProperties = {
     width: '100%',

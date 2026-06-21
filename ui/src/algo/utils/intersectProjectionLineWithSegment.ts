@@ -26,14 +26,14 @@ export function intersectProjectionLineWithSegment(
 
   const denom = a1 * c1 - b1 * b1;
 
-  if (Math.abs(denom) < 1e-6) {
-  }
+  // if (Math.abs(denom) < 1e-6) {
+  // }
 
   const t = (b1 * e1 - c1 * d1r) / denom;
-  const s = (a1 * e1 - b1 * d1r) / denom;
+  // const s = (a1 * e1 - b1 * d1r) / denom;
 
-  if (s <= 0 || s >= 1) {
-  }
+  // if (s <= 0 || s >= 1) {
+  // }
 
   return p1.clone().add(d1.clone().multiplyScalar(t));
 }

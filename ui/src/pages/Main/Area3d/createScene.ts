@@ -43,10 +43,7 @@ export function createScene(
 
   const controls = setupControls(camera.threeCamera, renderer);
 
-  // let prevTime = 0;
-  function animate(_time: DOMHighResTimeStamp) {
-    // const dt = time - prevTime;
-    // prevTime = time;
+  function animate() {
     controls.update();
     if (vcCubeRef.current) {
       const mat = new THREE.Matrix4();

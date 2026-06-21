@@ -58,7 +58,6 @@ export function useExecute(
       alert('something unexpected happened');
     } finally {
       setExecuting(false);
-
     }
   }
 
