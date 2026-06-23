@@ -1,6 +1,6 @@
 import { Box, Button, Flex } from '@chakra-ui/react';
 import { type ComponentRef, useEffect, useRef, useState } from 'react';
-import { useColors } from '@/useColors';
+import { useColors } from '@/shared/useColors';
 import * as THREE from 'three';
 import ViewCubeController from '@/vendor/three-viewcube';
 

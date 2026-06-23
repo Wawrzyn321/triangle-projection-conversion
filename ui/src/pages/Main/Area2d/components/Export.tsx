@@ -1,15 +1,15 @@
 import { Button, Group, IconButton, Menu, Portal } from '@chakra-ui/react';
 import { LuChevronDown } from 'react-icons/lu';
-import type { AlgoReturnWithName } from '../Area3d/types';
-import { downloadFile } from './downloadFile';
-import { createSvg } from './createSvg';
+import { downloadFile } from './../utils/downloadFile';
+import { createSvg } from './../utils/createSvg';
 
-import type { SizePreset } from './PaperSizeSelect';
-import { segment2dIterator } from '../iterators';
+import type { PaperFormat } from './../components/PaperSizeSelect';
+import type { AlgoReturnWithName } from '../../Area3d/types';
+import { createAndSavePdf } from './../utils/createAndSavePdf';
 
 type Props = {
   result: AlgoReturnWithName | null;
-  format: SizePreset['name'];
+  format: PaperFormat['name'];
 };
 
 export function Export({ result, format }: Props) {
@@ -20,22 +20,7 @@ export function Export({ result, format }: Props) {
       handleClick: async () => {
         if (!result) return;
 
-        try {
-          const { jsPDF } = await import('jspdf');
-
-          const doc = new jsPDF({
-            format: format.toLowerCase(),
-          });
-
-          for (const [p1, p2] of segment2dIterator(result)) {
-            doc.line(p1.x, p1.y, p2.x, p2.y);
-          }
-
-          doc.save(`${result.fileName}.pdf`);
-        } catch (e) {
-          alert('Something unexpected happened');
-          console.warn(e);
-        }
+        await createAndSavePdf(result, format);
       },
     },
     {

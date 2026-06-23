@@ -1,6 +1,6 @@
 import { HStack, Progress as ChakraProgress } from '@chakra-ui/react';
 import type { ProgressData } from '../../../types';
-import { useColors } from '@/useColors';
+import { useColors } from '@/shared/useColors';
 import './Progress.css';
 
 export function Progress({

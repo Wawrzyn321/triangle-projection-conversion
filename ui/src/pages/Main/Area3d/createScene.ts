@@ -5,7 +5,7 @@ import { setupControls } from './utils/setupControls';
 import type { RefObject } from 'react';
 import type { WorldOpts } from './types';
 import ViewCubeController from '@/vendor/three-viewcube';
-import type { useColors } from '@/useColors';
+import type { useColors } from '@/shared/useColors';
 
 export function createScene(
   rendererTarget: HTMLDivElement,

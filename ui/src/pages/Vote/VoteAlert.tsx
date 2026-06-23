@@ -1,5 +1,5 @@
 import { Alert } from '@chakra-ui/react';
-import { useColors } from '@/useColors';
+import { useColors } from '@/shared/useColors';
 
 export function VoteAlert() {
   const colors = useColors();

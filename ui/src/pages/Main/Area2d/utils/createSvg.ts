@@ -1,5 +1,5 @@
-import type { AlgoReturnWithName } from '../Area3d/types';
-import { point2dIterator, segment2dIterator } from '../iterators';
+import type { AlgoReturnWithName } from '../../Area3d/types';
+import { point2dIterator, segment2dIterator } from '../../iterators';
 
 export function createSvg(result: AlgoReturnWithName) {
   let minX = Infinity,

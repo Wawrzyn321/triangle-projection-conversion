@@ -41,7 +41,7 @@ export function drawFromSegments(
   ctx.restore();
 }
 
-export function drawScale(
+function drawScale(
   ctx: CanvasRenderingContext2D,
   data: AlgoReturn,
   scale: number,

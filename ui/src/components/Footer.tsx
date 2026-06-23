@@ -1,4 +1,4 @@
-import { useColors } from '@/useColors';
+import { useColors } from '@/shared/useColors';
 import { Flex, Text } from '@chakra-ui/react';
 
 const FOOTER_HEIGHT = '60px';

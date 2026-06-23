@@ -1,6 +1,6 @@
-import { useColors } from '@/useColors';
+import { useColors } from '@/shared/useColors';
 import { Image, Flex, Heading, Text, Link } from '@chakra-ui/react';
-import { ColorModeButton } from './ui/color-mode';
+import { ColorModeButton } from '../shared/color-mode';
 
 const HEADER_HEIGHT = '60px';
 const HEADER_MAX_WIDTH = '900px';

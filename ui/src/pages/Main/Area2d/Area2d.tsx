@@ -7,11 +7,14 @@ import {
   type ComponentRef,
   type CSSProperties,
 } from 'react';
-import { drawFromSegments, clearCanvas } from '@/algo/utils/canvasHelpers';
-import { useColors } from '@/useColors';
-import { SIZE_PRESETS, type SizePreset } from './PaperSizeSelect';
-import { Translator } from './Translator';
-import { BottomPanel } from './BottomPanel';
+import { drawFromSegments, clearCanvas } from './utils/canvasHelpers';
+import { useColors } from '@/shared/useColors';
+import {
+  PAPER_FORMAT_PRESETS,
+  type PaperFormat,
+} from './components/PaperSizeSelect';
+import { Translator } from './components/Translator';
+import { BottomPanel } from './components/BottomPanel';
 import type { AlgoReturnWithName } from '../Area3d/types';
 
 type Props = {
@@ -21,7 +24,7 @@ type Props = {
 export function Area2d({ result }: Props) {
   const canvasRef = useRef<ComponentRef<'canvas'> | null>(null);
   const containerRef = useRef<ComponentRef<'div'> | null>(null);
-  const [size, setSize] = useState<SizePreset>(SIZE_PRESETS[1]);
+  const [format, setFormat] = useState<PaperFormat>(PAPER_FORMAT_PRESETS[1]);
   const colors = useColors();
   const [shift, setShift] = useState({ x: 0, y: 0 });
 
@@ -36,11 +39,11 @@ export function Area2d({ result }: Props) {
     canvasRef.current.width = displayW * dpr;
     canvasRef.current.height = displayH * dpr;
     const scale = {
-      x: (displayW * dpr) / size.width,
-      y: (displayH * dpr) / Number(size.height),
+      x: (displayW * dpr) / format.width,
+      y: (displayH * dpr) / Number(format.height),
     };
     drawFromSegments(canvasRef.current, result, scale);
-  }, [result, size]);
+  }, [result, format]);
 
   useEffect(() => {
     if (result) {
@@ -50,7 +53,7 @@ export function Area2d({ result }: Props) {
     } else {
       clearCanvas(canvasRef.current);
     }
-  }, [result, size, redraw]);
+  }, [result, format, redraw]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -84,12 +87,7 @@ export function Area2d({ result }: Props) {
           </Translator>
         </div>
       </AspectRatio>
-      <BottomPanel
-        size={size}
-        setSize={setSize}
-        result={result}
-        format={size.name}
-      />
+      <BottomPanel format={format} setFormat={setFormat} result={result} />
     </div>
   );
 }

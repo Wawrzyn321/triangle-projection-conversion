@@ -1,4 +1,4 @@
-import { useColors } from '@/useColors';
+import { useColors } from '@/shared/useColors';
 import { Center, Button, Text } from '@chakra-ui/react';
 import React, {
   useRef,

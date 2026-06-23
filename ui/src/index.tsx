@@ -6,7 +6,7 @@ import { createRoot } from 'react-dom/client';
 
 import { ChakraProvider, createSystem, defaultConfig } from '@chakra-ui/react';
 import { PageLayout } from './components/PageLayout';
-import { ColorModeProvider } from './components/ui/color-mode';
+import { ColorModeProvider } from './shared/color-mode';
 
 const system = createSystem(defaultConfig, {
   theme: {

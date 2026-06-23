@@ -1,6 +1,6 @@
 import type { FEATURES } from './FEATURES';
 import { Button, Flex, ListItem, Text } from '@chakra-ui/react';
-import { useColors } from '@/useColors';
+import { useColors } from '@/shared/useColors';
 
 type Props = {
   feature: (typeof FEATURES)[number];

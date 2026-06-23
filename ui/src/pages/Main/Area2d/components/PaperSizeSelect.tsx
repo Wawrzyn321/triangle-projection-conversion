@@ -1,6 +1,6 @@
 import { Flex } from '@chakra-ui/react';
 
-export const SIZE_PRESETS = (
+export const PAPER_FORMAT_PRESETS = (
   [
     ['A3', 297],
     ['A4', 210],
@@ -12,24 +12,28 @@ export const SIZE_PRESETS = (
   width,
 }));
 
-export type SizePreset = (typeof SIZE_PRESETS)[number];
+export type PaperFormat = (typeof PAPER_FORMAT_PRESETS)[number];
 
 type Props = {
-  size: SizePreset;
-  setSize(size: SizePreset): void;
+  format: PaperFormat;
+  setFormat(format: PaperFormat): void;
 };
 
-export function PaperSizeSelect({ size, setSize }: Props) {
+export function PaperSizeSelect({ format, setFormat }: Props) {
   return (
     <Flex padding={1}>
       <select
         name="paper-size"
         onChange={e =>
-          setSize(SIZE_PRESETS.find(preset => preset.name === e.target.value)!)
+          setFormat(
+            PAPER_FORMAT_PRESETS.find(
+              preset => preset.name === e.target.value,
+            )!,
+          )
         }
-        value={size.name}
+        value={format.name}
       >
-        {SIZE_PRESETS.map(preset => (
+        {PAPER_FORMAT_PRESETS.map(preset => (
           <option key={preset.name} value={preset.name}>
             {preset.name} ({preset.height} x {preset.width}mm)
           </option>
