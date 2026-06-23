@@ -5,21 +5,22 @@ import { useColors } from '@/useColors';
 type Props = {
   feature: (typeof FEATURES)[number];
   disabled: boolean;
-  handleVote: (vote: (typeof FEATURES)[number]['key']) => void;
 };
 
-export function VoteOption({ feature, handleVote, disabled }: Props) {
+export function VoteOption({ feature, disabled }: Props) {
   const colors = useColors();
   return (
-    <ListItem key={feature.key}>
+    <ListItem>
       <Text fontSize="lg">{feature.name}</Text>
       <Text fontWeight="lighter">{feature.description}</Text>
       <Flex justify="end">
         <Button
+          name="vote"
+          value={feature.key}
           backgroundColor={colors.PRIMARY}
           disabled={disabled}
-          onClick={() => handleVote(feature.key)}
           height="32px"
+          type='submit'
           color={colors.WHITE}
         >
           Vote

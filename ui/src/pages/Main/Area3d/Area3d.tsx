@@ -1,5 +1,5 @@
 import { Box, Button, Flex } from '@chakra-ui/react';
-import { useEffect, useRef, useState } from 'react';
+import { type ComponentRef, useEffect, useRef, useState } from 'react';
 import { useColors } from '@/useColors';
 import * as THREE from 'three';
 import ViewCubeController from '@/vendor/three-viewcube';
@@ -25,10 +25,10 @@ type Props = {
 
 export function Area3d({ setResult }: Props) {
   const colors = useColors();
-  const rendererRef = useRef<HTMLDivElement | null>(null);
+  const rendererRef = useRef<ComponentRef<'div'> | null>(null);
   const worldOpts = useRef<WorldOpts>(null);
   const vcControllerRef = useRef<ViewCubeController>(null);
-  const vcCubeRef = useRef<HTMLDivElement>(null);
+  const vcCubeRef = useRef<ComponentRef<'div'>>(null);
   const [progressData, setProgressData] = useState<ProgressData | null>(null);
 
   const {

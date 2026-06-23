@@ -13,7 +13,7 @@ export function useHandleLoadModel(opts: RefObject<WorldOpts | null>) {
   const [maxDimension, setMaxDimension] = useState(0);
   const [fileName, setFileName] = useState('');
   const [scalingFactor, setScalingFactor] = useState(0);
-  const modelRef = useRef<null | THREE.Mesh>(null);
+  const modelRef = useRef<THREE.Mesh | null>(null);
 
   const handleLoadModel = async (file: File) => {
     if (!opts.current) {

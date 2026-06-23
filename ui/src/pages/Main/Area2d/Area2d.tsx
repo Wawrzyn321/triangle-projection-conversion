@@ -4,6 +4,7 @@ import {
   useEffect,
   useRef,
   useState,
+  type ComponentRef,
   type CSSProperties,
 } from 'react';
 import { drawFromSegments, clearCanvas } from '@/algo/utils/canvasHelpers';
@@ -18,8 +19,8 @@ type Props = {
 };
 
 export function Area2d({ result }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<ComponentRef<'canvas'> | null>(null);
+  const containerRef = useRef<ComponentRef<'div'> | null>(null);
   const [size, setSize] = useState<SizePreset>(SIZE_PRESETS[1]);
   const colors = useColors();
   const [shift, setShift] = useState({ x: 0, y: 0 });

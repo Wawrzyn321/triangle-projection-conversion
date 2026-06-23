@@ -1,6 +1,6 @@
 export const FEATURES = [
   {
-    name: 'Support other mesh formats than stl',
+    name: 'Support mesh formats other than .stl',
     description:
       'In addition to .stl, allow importing formats like .step, .blend and others.',
     key: 'formats',
@@ -16,5 +16,11 @@ export const FEATURES = [
     description:
       'Want to print a stencil with multiple shapes? This will allow placing multiple projected shapes on the paper.',
     key: 'multiple-projections',
+  },
+  {
+    name: 'More paper controls',
+    description:
+      'Scaling, rotating and adding dimensions after the shape is projected in 2d',
+    key: 'paper-controls',
   },
 ];

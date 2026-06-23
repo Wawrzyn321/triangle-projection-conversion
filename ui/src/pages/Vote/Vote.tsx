@@ -1,36 +1,72 @@
 import { Article } from '@/components/Article';
 import { Heading } from '@/components/Heading';
-import { ListRoot } from '@chakra-ui/react';
+import { Box, ListRoot } from '@chakra-ui/react';
 import { getVote, saveVote } from './voteStorage';
-import { useState } from 'react';
+import { useRef, useState, type SubmitEvent } from 'react';
 import { FEATURES } from './FEATURES';
 import { VoteAlert } from './VoteAlert';
 import { VoteOption } from './VoteOption';
+import { Paragraph } from '@/components/Paragraph';
+
+const MIN_FORM_FILL_TIME = 3000;
 
 export function Vote() {
   const [existingVote, setExistingVote] = useState(() => getVote());
+  const formLoadedAt = useRef<number>(Date.now());
 
-  async function handleVote(key: (typeof FEATURES)[number]['key']) {
-    setExistingVote(key);
-    if (saveVote(key)) {
-      alert('todo request');
+  async function onSubmit(e: SubmitEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const timeOnPage = Date.now() - formLoadedAt.current;
+
+    let isSubmitValid = true;
+
+    const formData = new FormData(document.forms[0]);
+
+    // check if submit time is sane
+    if (timeOnPage < MIN_FORM_FILL_TIME) {
+      isSubmitValid = false;
+    }
+    // check if bot didn't fill agreement field
+    if (formData.get('agreement') !== null) {
+      isSubmitValid = false;
+    }
+
+    const submitter = e.nativeEvent.submitter as HTMLButtonElement;
+    const key = submitter.value;
+
+    if (saveVote(key) && isSubmitValid) {
+      fetch('/', {method: 'POST', body: formData})
+        .catch(() => { })
+        .finally(() => setExistingVote(key));
     }
   }
 
   return (
     <Article>
-      <Heading>Vote for new features!</Heading>
+      <Heading>Vote for a new feature!</Heading>
+      <Paragraph>Choose on feature you'd like to see on the website.</Paragraph>
       {existingVote && <VoteAlert />}
-      <ListRoot>
-        {FEATURES.map(feature => (
-          <VoteOption
-            feature={feature}
-            disabled={!!existingVote}
-            handleVote={handleVote}
-            key={feature.key}
-          />
-        ))}
-      </ListRoot>
-    </Article>
+      <form action="/sub" method="post" onSubmit={onSubmit}>
+        <ListRoot>
+          {FEATURES.map(feature => (
+            <VoteOption
+              feature={feature}
+              disabled={!!existingVote}
+              key={feature.key}
+            />
+          ))}
+        </ListRoot>
+        <HoneypotFields />
+      </form>
+    </Article >
   );
+}
+
+function HoneypotFields() {
+  return <>
+    <Box display='none' aria-hidden="true">
+      <label htmlFor="agreement">Agreed?</label>
+      <input type="checkbox" id="agreement" name="agreement" tabIndex={-1} autoComplete="off" />
+    </Box>
+  </>
 }

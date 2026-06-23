@@ -1,6 +1,6 @@
 import { useColors } from '@/useColors';
 import { Center, Button, Text } from '@chakra-ui/react';
-import React, { useRef, useState, type ChangeEvent } from 'react';
+import React, { useRef, useState, type ChangeEvent, type ComponentRef } from 'react';
 import { BOTTOM_BAR_HEIGHT } from '../const';
 
 export function FileSelectOverlay({
@@ -9,7 +9,7 @@ export function FileSelectOverlay({
   onModelLoad: (file: File) => void;
 }) {
   const colors = useColors();
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<ComponentRef<'input'> | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
   function handleButtonClick() {

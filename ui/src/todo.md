@@ -34,3 +34,6 @@ throttling → 0
 or deploys “maintenance mode” version
 
 ✔ stops all incoming traffic instantly
+
+
+głosowanie - w lambdzie w momencie gdy przyjdzie to przekierowuje z powrotem do strony
