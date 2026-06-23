@@ -12,14 +12,12 @@ terraform {
 # certyfikatów ACM - jeśli przeniosę TYLKO pierwszy gdzie indziej,
 # ACM dalej będzie działać
 provider "aws" {
-  region                   = "us-east-1"
-  shared_credentials_files = ["/Users/pw/.aws/credentials"]
-  profile                  = "personal_terraform"
+  region  = "us-east-1"
+  profile = "personal_terraform"
 }
 
 provider "aws" {
-  alias                    = "aws_provider_but_in_us_east_1"
-  region                   = "us-east-1"
-  shared_credentials_files = ["/Users/pw/.aws/credentials"]
-  profile                  = "personal_terraform"
+  alias   = "aws_provider_but_in_us_east_1"
+  region  = "us-east-1"
+  profile = "personal_terraform"
 }

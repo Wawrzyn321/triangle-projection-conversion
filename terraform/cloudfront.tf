@@ -42,6 +42,8 @@ resource "aws_cloudfront_distribution" "site" {
       event_type   = "viewer-request"
       function_arn = aws_cloudfront_function.site_canonical_function.arn
     }
+
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.security_headers.id
   }
 
   restrictions {
@@ -68,6 +70,41 @@ resource "aws_cloudfront_distribution" "site" {
     response_page_path = "/index.html"
   }
 
+}
+
+resource "aws_cloudfront_response_headers_policy" "security_headers" {
+  name = "security-headers"
+
+  security_headers_config {
+    strict_transport_security {
+      access_control_max_age_sec = 31536000
+      include_subdomains         = true
+      preload                    = true
+      override                   = true
+    }
+    content_type_options {
+      override = true
+    }
+    frame_options {
+      frame_option = "DENY"
+      override     = true
+    }
+    xss_protection {
+      mode_block = true
+      protection = true
+      override   = true
+    }
+    referrer_policy {
+      referrer_policy = "strict-origin-when-cross-origin"
+      override        = true
+    }
+    content_security_policy {
+      # unsafe-inline required for Chakra UI (emotion CSS-in-JS)
+      # blob: required for Three.js workers and jsPDF object URLs
+      content_security_policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self'; frame-ancestors 'none';"
+      override                = true
+    }
+  }
 }
 
 resource "aws_cloudfront_function" "site_canonical_function" {

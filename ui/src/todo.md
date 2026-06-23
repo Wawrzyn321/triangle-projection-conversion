@@ -20,3 +20,5 @@ So:
 20 MB ❌ exceeds Lambda limit
 
 głosowanie - w lambdzie w momencie gdy przyjdzie to przekierowuje z powrotem do strony
+
+https://chatgpt.com/c/6a2aaecf-fbe8-83eb-8744-6a4b670a0b6f
