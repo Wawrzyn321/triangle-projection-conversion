@@ -1,9 +1,7 @@
 import { VStack } from '@chakra-ui/react';
 import { Footer } from './Footer';
 import { Header } from './Header';
-import { Main } from '@/pages/Main/Main';
-import { Info } from '@/pages/Info/Info';
-import { Vote } from '@/pages/Vote/Vote';
+import { Router } from './Router';
 
 export function PageLayout() {
   return (
@@ -15,17 +13,4 @@ export function PageLayout() {
       <Footer />
     </VStack>
   );
-}
-
-function Router() {
-  const { pathname } = window.location;
-
-  switch (pathname) {
-    case '/info':
-      return <Info />;
-    case '/vote':
-      return <Vote />;
-    default:
-      return <Main />;
-  }
 }

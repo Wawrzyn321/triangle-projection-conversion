@@ -37,6 +37,11 @@ resource "aws_cloudfront_distribution" "site" {
         forward = "none"
       }
     }
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.site_canonical_function.arn
+    }
   }
 
   restrictions {
@@ -62,4 +67,13 @@ resource "aws_cloudfront_distribution" "site" {
     response_code      = 200
     response_page_path = "/index.html"
   }
+
+}
+
+resource "aws_cloudfront_function" "site_canonical_function" {
+  name    = "site-canonical-function"
+  runtime = "cloudfront-js-2.0"
+  comment = "Redirect www.domain.com --> domain.com"
+  publish = true
+  code    = file("${path.module}/functions/viewer-request.js")
 }

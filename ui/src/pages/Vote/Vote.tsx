@@ -12,6 +12,7 @@ const MIN_FORM_FILL_TIME = 3000;
 
 export function Vote() {
   const [existingVote, setExistingVote] = useState(() => getVote());
+  // eslint-disable-next-line react-hooks/purity
   const formLoadedAt = useRef<number>(Date.now());
 
   async function onSubmit(e: SubmitEvent<HTMLFormElement>) {
@@ -35,8 +36,8 @@ export function Vote() {
     const key = submitter.value;
 
     if (saveVote(key) && isSubmitValid) {
-      fetch('/', {method: 'POST', body: formData})
-        .catch(() => { })
+      fetch('/', { method: 'POST', body: formData })
+        .catch(() => {})
         .finally(() => setExistingVote(key));
     }
   }
@@ -58,15 +59,23 @@ export function Vote() {
         </ListRoot>
         <HoneypotFields />
       </form>
-    </Article >
+    </Article>
   );
 }
 
 function HoneypotFields() {
-  return <>
-    <Box display='none' aria-hidden="true">
-      <label htmlFor="agreement">Agreed?</label>
-      <input type="checkbox" id="agreement" name="agreement" tabIndex={-1} autoComplete="off" />
-    </Box>
-  </>
+  return (
+    <>
+      <Box display="none" aria-hidden="true">
+        <label htmlFor="agreement">Agreed?</label>
+        <input
+          type="checkbox"
+          id="agreement"
+          name="agreement"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </Box>
+    </>
+  );
 }

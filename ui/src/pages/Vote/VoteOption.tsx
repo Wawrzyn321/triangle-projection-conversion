@@ -20,7 +20,7 @@ export function VoteOption({ feature, disabled }: Props) {
           backgroundColor={colors.PRIMARY}
           disabled={disabled}
           height="32px"
-          type='submit'
+          type="submit"
           color={colors.WHITE}
         >
           Vote
