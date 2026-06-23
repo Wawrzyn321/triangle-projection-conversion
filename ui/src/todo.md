@@ -1,5 +1,3 @@
-5.  AWS WAF
-
 - lambda for feedback
 - ddb for feedback
 - api gateway
@@ -20,19 +18,5 @@ So:
 
 20 MB ❌ exceeds API Gateway limit
 20 MB ❌ exceeds Lambda limit
-
-🧯 3. Automatic “shutdown actions” (important part)
-
-This is where you actually stop things.
-
-Option A — Disable API Gateway (best for abuse stop)
-
-Trigger Lambda from SNS:
-
-Updates API Gateway stage:
-throttling → 0
-or deploys “maintenance mode” version
-
-✔ stops all incoming traffic instantly
 
 głosowanie - w lambdzie w momencie gdy przyjdzie to przekierowuje z powrotem do strony
