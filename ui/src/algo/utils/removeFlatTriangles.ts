@@ -18,7 +18,7 @@ export function removeFlatTriangles(
   });
 }
 
-export function projectedArea(
+function projectedArea(
   v0: THREE.Vector3,
   v1: THREE.Vector3,
   v2: THREE.Vector3,

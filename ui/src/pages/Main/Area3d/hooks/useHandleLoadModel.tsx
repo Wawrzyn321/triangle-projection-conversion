@@ -1,7 +1,5 @@
-import { clearScene } from '@/algo/utils/clearScene';
-import { createWireframe } from '@/algo/utils/createWireframe';
 import { getModelBBSize } from '@/pages/Main/Area3d/utils/getModelBBSize';
-import { loadGeometryFromFile } from '@/algo/utils/loadGeometryFromFile';
+import { loadGeometryFromFile } from '@/pages/Main/Area3d/utils/loadGeometryFromFile';
 import { type RefObject, useState, useRef } from 'react';
 import * as THREE from 'three';
 import { type WorldOpts } from '../types';
@@ -93,4 +91,17 @@ function getScalingFactor(dimension: number, min: number, max: number) {
 
 function withoutExtension(name: string) {
   return name.substring(0, name.lastIndexOf('.'));
+}
+
+function clearScene(scene: THREE.Scene) {
+  while (scene.children.length > 0) {
+    scene.remove(scene.children[0]);
+  }
+}
+
+function createWireframe(geometry: THREE.BufferGeometry) {
+  return new THREE.LineSegments(
+    new THREE.EdgesGeometry(geometry),
+    new THREE.LineBasicMaterial({ color: 0xffffff }),
+  );
 }
