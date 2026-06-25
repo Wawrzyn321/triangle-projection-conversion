@@ -21,8 +21,33 @@ resource "aws_cloudfront_distribution" "site" {
     origin_access_control_id = aws_cloudfront_origin_access_control.website_aoc.id
   }
 
+  origin {
+    domain_name = trimprefix(aws_apigatewayv2_api.api.api_endpoint, "https://")
+    origin_id   = "api-gw"
+
+    custom_origin_config {
+      http_port              = 80
+      https_port             = 443
+      origin_protocol_policy = "https-only"
+      origin_ssl_protocols   = ["TLSv1.2"]
+    }
+  }
+
   default_root_object = "index.html"
   price_class         = "PriceClass_100"
+
+  ordered_cache_behavior {
+    path_pattern     = "/feedback"
+    target_origin_id = "api-gw"
+
+    allowed_methods = ["HEAD", "DELETE", "POST", "GET", "OPTIONS", "PUT", "PATCH"]
+    cached_methods  = ["HEAD", "GET"]
+
+    viewer_protocol_policy = "https-only"
+
+    cache_policy_id          = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # CachingDisabled
+    origin_request_policy_id = "b689b0a8-53d0-40ab-baf2-68738e2966ac" # AllViewerExceptHostHeader
+  }
 
   default_cache_behavior {
     target_origin_id       = "s3-origin"

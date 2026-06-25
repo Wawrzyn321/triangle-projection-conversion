@@ -1,0 +1,47 @@
+{
+  "name": "feedback-lambda",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "handler.ts",
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --minify --platform=node --outdir=dist",
+    "package": "zip -jr lambda.zip dist/*",
+    "dev": "tsx --watch src/dev-server.ts",
+    "lint": "eslint .",
+    "lint:check": "eslint --fix .",
+    "test": "vitest",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1075.0",
+    "@aws-sdk/lib-dynamodb": "^3.1075.0",
+    "@koa/cors": "^5.0.0",
+    "busboy": "^1.6.0",
+    "koa": "^3.2.1",
+    "koa-body": "^8.0.0",
+    "koa-bodyparser": "^4.4.0",
+    "koa-router": "^7.4.0",
+    "typescript-eslint": "^8.62.0",
+    "uuid": "^14.0.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/busboy": "^1.5.4",
+    "@types/koa__cors": "^5.0.0",
+    "@types/koa-bodyparser": "^4.3.11",
+    "@types/koa-router": "7.0.41",
+    "@types/node": "^26.0.1",
+    "@types/pg": "^8.16.0",
+    "esbuild": "^0.28.1",
+    "eslint": "^10.3.0",
+    "globals": "^17.7.0",
+    "prettier": "^3.8.4",
+    "typescript": "~6.0.2",
+    "vitest": "^4.1.9"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

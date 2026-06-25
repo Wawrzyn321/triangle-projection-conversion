@@ -10,6 +10,9 @@ import { Paragraph } from '@/components/Paragraph';
 
 const MIN_FORM_FILL_TIME = 3000;
 
+// const FEEDBACK_URL = 'http://localhost:9010'
+const FEEDBACK_URL = 'https://3d-projection-lab.com/feedback';
+
 export function Vote() {
   const [existingVote, setExistingVote] = useState(() => getVote());
   // eslint-disable-next-line react-hooks/purity
@@ -36,8 +39,8 @@ export function Vote() {
     const key = submitter.value;
 
     if (saveVote(key) && isSubmitValid) {
-      fetch('/', { method: 'POST', body: formData })
-        .catch(() => {})
+      formData.set('vote', key);
+      fetch(FEEDBACK_URL, { method: 'POST', body: formData }).catch(() => { })
         .finally(() => setExistingVote(key));
     }
   }
