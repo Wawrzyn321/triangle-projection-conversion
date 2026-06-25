@@ -40,7 +40,8 @@ export function Vote() {
 
     if (saveVote(key) && isSubmitValid) {
       formData.set('vote', key);
-      fetch(FEEDBACK_URL, { method: 'POST', body: formData }).catch(() => { })
+      fetch(FEEDBACK_URL, { method: 'POST', body: formData })
+        .catch(() => {})
         .finally(() => setExistingVote(key));
     }
   }

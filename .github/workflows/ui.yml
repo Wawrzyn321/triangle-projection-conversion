@@ -1,4 +1,4 @@
-name: Triangle Conversion
+name: UI
 on:
   push:
     branches: [ master ]
