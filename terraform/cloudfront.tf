@@ -126,7 +126,7 @@ resource "aws_cloudfront_response_headers_policy" "security_headers" {
     content_security_policy {
       # unsafe-inline required for Chakra UI (emotion CSS-in-JS)
       # blob: required for Three.js workers and jsPDF object URLs
-      content_security_policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self'; frame-ancestors 'none';"
+      content_security_policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self'; frame-ancestors 'none';"
       override                = true
     }
   }

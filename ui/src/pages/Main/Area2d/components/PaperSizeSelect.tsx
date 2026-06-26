@@ -31,6 +31,7 @@ export function PaperSizeSelect({ format, setFormat }: Props) {
             )!,
           )
         }
+        aria-label="format size"
         value={format.name}
       >
         {PAPER_FORMAT_PRESETS.map(preset => (

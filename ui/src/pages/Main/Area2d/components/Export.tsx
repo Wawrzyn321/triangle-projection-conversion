@@ -43,7 +43,7 @@ export function Export({ result, format }: Props) {
         <Button variant="outline" size="sm" disabled={!result}>
           Export
         </Button>
-        <Menu.Trigger asChild disabled={!result}>
+        <Menu.Trigger asChild disabled={!result} aria-label="open export menu">
           <IconButton variant="outline" size="sm">
             <LuChevronDown />
           </IconButton>
