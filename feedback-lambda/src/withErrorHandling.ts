@@ -1,3 +1,4 @@
+import { CORS_HEADERS } from "./const";
 import { Result } from "./types";
 import { ValidationError } from "./validation";
 
@@ -7,11 +8,6 @@ export async function withErrorHandling(
   try {
     return await callback();
   } catch (error) {
-    console.log(
-      error,
-      error instanceof Error,
-      error instanceof ValidationError,
-    );
     if (!(error instanceof Error)) {
       throw error;
     }
@@ -20,7 +16,7 @@ export async function withErrorHandling(
 
     return {
       statusCode,
-      headers: { "Access-Control-Allow-Origin": "*" },
+      headers: CORS_HEADERS,
       body: { error },
     };
   }

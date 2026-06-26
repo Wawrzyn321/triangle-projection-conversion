@@ -21,7 +21,6 @@
     "busboy": "^1.6.0",
     "koa": "^3.2.1",
     "koa-body": "^8.0.0",
-    "koa-bodyparser": "^4.4.0",
     "koa-router": "^7.4.0",
     "typescript-eslint": "^8.62.0",
     "uuid": "^14.0.1"
@@ -30,7 +29,6 @@
     "@eslint/js": "^10.0.1",
     "@types/busboy": "^1.5.4",
     "@types/koa__cors": "^5.0.0",
-    "@types/koa-bodyparser": "^4.3.11",
     "@types/koa-router": "7.0.41",
     "@types/node": "^26.0.1",
     "@types/pg": "^8.16.0",

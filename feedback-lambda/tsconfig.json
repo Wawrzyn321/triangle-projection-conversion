@@ -1,2 +1,7 @@
-// left empty because it just works
-{}
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "esModuleInterop": true
+  },
+  "exclude": ["node_modules"]
+}

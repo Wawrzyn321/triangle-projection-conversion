@@ -9,9 +9,10 @@ import { VoteOption } from './VoteOption';
 import { Paragraph } from '@/components/Paragraph';
 
 const MIN_FORM_FILL_TIME = 3000;
-
-// const FEEDBACK_URL = 'http://localhost:9010'
-const FEEDBACK_URL = 'https://3d-projection-lab.com/feedback';
+const FEEDBACK_URL =
+  import.meta.env.MODE === 'production'
+    ? 'https://3d-projection-lab.com/feedback'
+    : 'http://localhost:9010/feedback';
 
 export function Vote() {
   const [existingVote, setExistingVote] = useState(() => getVote());
@@ -43,6 +44,8 @@ export function Vote() {
       fetch(FEEDBACK_URL, { method: 'POST', body: formData })
         .catch(() => {})
         .finally(() => setExistingVote(key));
+    } else {
+      setExistingVote(key);
     }
   }
 
