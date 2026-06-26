@@ -1,0 +1,27 @@
+name: 'Feedback Lambda Unit Tests'
+description: 'Lint, format, and test feedback-lambda'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 24
+        cache: npm
+        cache-dependency-path: feedback-lambda/package-lock.json
+
+    - name: Install dependencies
+      working-directory: feedback-lambda
+      shell: bash
+      run: npm ci
+
+    - name: Lint & format check
+      working-directory: feedback-lambda
+      shell: bash
+      run: npm run lint:check && npm run format:check
+
+    - name: Run tests
+      working-directory: feedback-lambda
+      shell: bash
+      run: npm test

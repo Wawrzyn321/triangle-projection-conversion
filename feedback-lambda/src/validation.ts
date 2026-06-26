@@ -1,5 +1,12 @@
 import { AWSHttpEvent } from "./types";
 
+const validVotes = [
+  "formats",
+  "improve-algo",
+  "multiple-projections",
+  "paper-controls",
+];
+
 export class ValidationError extends Error {
   constructor(message: string) {
     super(message);
@@ -15,13 +22,6 @@ export function validateEvent(event: AWSHttpEvent) {
 }
 
 export function validateBody(rawBody: unknown) {
-  const validVotes = [
-    "formats",
-    "improve-algo",
-    "multiple-projections",
-    "paper-controls",
-  ];
-
   if (typeof rawBody !== "object" || !rawBody) {
     throw new ValidationError("Body is not an object");
   }

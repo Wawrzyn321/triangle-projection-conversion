@@ -1,34 +1,33 @@
-name: UI
+name: Feedback lambda
 on:
   push:
     branches: [ master ]
     paths:
-      - 'ui/**'
-      - '.github/actions/ui-*/**'
-      - '.github/workflows/ui.yml'
+      - 'feedback-lambda/**'
+      - '.github/actions/feedback-lambda-*/**'
+      - '.github/workflows/feedback-lambda.yml'
   pull_request:
     branches: [ master ]
     paths:
-      - 'ui/**'
-      - '.github/actions/ui-*/**'
-      - '.github/workflows/ui.yml'
+      - 'feedback-lambda/**'
+      - '.github/actions/feedback-lambda-*/**'
+      - '.github/workflows/feedback-lambda.yml'
 
 jobs:
   Units:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/ui-units
+      - uses: ./.github/actions/feedback-lambda-units
 
   Deploy:
     runs-on: ubuntu-latest
     needs: [Units]
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/ui-deploy
+      - uses: ./.github/actions/feedback-lambda-deploy
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
-          s3-bucket: ${{ secrets.S3_BUCKET }}
-          cloudfront-id: ${{ secrets.CLOUDFRONT_ID }}
+          lambda-function-name: ${{ secrets.LAMBDA_FUNCTION_NAME }}

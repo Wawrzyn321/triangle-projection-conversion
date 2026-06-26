@@ -1,6 +1,5 @@
 resource "aws_apigatewayv2_api" "api" {
   api_key_selection_expression = "$request.header.x-api-key"
-  description                  = "Created by AWS Lambda"
   name                         = "lambda-api"
   protocol_type                = "HTTP"
   route_selection_expression   = "$request.method $request.path"

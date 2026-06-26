@@ -1,5 +1,5 @@
-name: "Deploy"
-description: "Deploy"
+name: 'Feedback Lambda Deploy'
+description: 'Build, package, and deploy feedback-lambda to AWS Lambda'
 
 inputs:
   aws-access-key-id:
@@ -11,34 +11,34 @@ inputs:
   aws-region:
     description: AWS_REGION
     required: true
-  s3-bucket:
-    description: S3_BUCKET
-    required: true
-  cloudfront-id:
-    description: CLOUDFRONT_ID
+  lambda-function-name:
+    description: Lambda function name
     required: true
 
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v4
-
-    - name: Setup Node
+    - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
         node-version: 24
         cache: npm
-        cache-dependency-path: ui/package-lock.json
+        cache-dependency-path: feedback-lambda/package-lock.json
 
-    - name: Install deps
-      working-directory: ui
+    - name: Install dependencies
+      working-directory: feedback-lambda
       shell: bash
       run: npm ci
 
     - name: Build
-      working-directory: ui
+      working-directory: feedback-lambda
       shell: bash
       run: npm run build
+
+    - name: Package
+      working-directory: feedback-lambda
+      shell: bash
+      run: npm run package
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v4
@@ -47,13 +47,10 @@ runs:
         aws-secret-access-key: ${{ inputs.aws-secret-access-key }}
         aws-region: ${{ inputs.aws-region }}
 
-    - name: Sync to S3
-      shell: bash
-      run: aws s3 sync ui/dist s3://${{ inputs.s3-bucket }} --delete --cache-control "public,max-age=31536000,immutable"
-
-    - name: Invalidate CloudFront
+    - name: Deploy to Lambda
+      working-directory: feedback-lambda
       shell: bash
       run: |
-        aws cloudfront create-invalidation \
-          --distribution-id ${{ inputs.cloudfront-id }} \
-          --paths "/*"
+        aws lambda update-function-code \
+          --function-name ${{ inputs.lambda-function-name }} \
+          --zip-file fileb://lambda.zip
