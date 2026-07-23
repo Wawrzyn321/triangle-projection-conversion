@@ -9,6 +9,8 @@ export function Router() {
   const { pathname } = window.location;
 
   useUpdateCanonicalLink(pathname);
+  useUpdateDocumentTitle(pathname);
+  useUpdateMetaDescription(pathname);
 
   switch (pathname) {
     case '/info':
@@ -20,6 +22,23 @@ export function Router() {
   }
 }
 
+function useUpdateDocumentTitle(pathname: string) {
+  useEffect(() => {
+    const title = (() => {
+      switch (pathname) {
+        case '/info':
+          return '3D Projection Lab - how it works';
+        case '/vote':
+          return '3D Projection Lab - vote for new features';
+        default:
+          return '3D Projection Lab';
+      }
+    })();
+
+    document.title = title;
+  }, [pathname]);
+}
+
 function useUpdateCanonicalLink(pathname: string) {
   useEffect(() => {
     const link =
@@ -28,5 +47,28 @@ function useUpdateCanonicalLink(pathname: string) {
 
     link.setAttribute('rel', 'canonical');
     link.setAttribute('href', CANONICAL + pathname);
+  }, [pathname]);
+}
+
+function useUpdateMetaDescription(pathname: string) {
+  useEffect(() => {
+    const meta =
+      document.querySelector("meta[name='description']") ||
+      document.head.appendChild(
+        Object.assign(document.createElement('meta'), { name: 'description' }),
+      );
+
+    const description = (() => {
+      switch (pathname) {
+        case '/info':
+          return 'How the 3D to 2D projection algorithm works, usage guide, and limitations.';
+        case '/vote':
+          return 'Vote for upcoming features in 3D Projection Lab.';
+        default:
+          return 'Create accurate 2D projections of 3D STL meshes. Export to SVG or PDF.';
+      }
+    })();
+
+    meta.setAttribute('content', description);
   }, [pathname]);
 }

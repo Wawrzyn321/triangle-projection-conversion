@@ -1,4 +1,4 @@
-import { AspectRatio } from '@chakra-ui/react';
+import { AspectRatio, Box, Text } from '@chakra-ui/react';
 import {
   useCallback,
   useEffect,
@@ -71,7 +71,7 @@ export function Area2d({ result }: Props) {
   };
 
   return (
-    <div id="area-2d-layout-receiver">
+    <Box id="area-2d-layout-receiver" position="relative">
       <AspectRatio
         border="1px solid black"
         w="100%"
@@ -88,6 +88,19 @@ export function Area2d({ result }: Props) {
         </div>
       </AspectRatio>
       <BottomPanel format={format} setFormat={setFormat} result={result} />
-    </div>
+      {!result && (
+        <Text
+          position="absolute"
+          top={'50%'}
+          left={'50%'}
+          transform="translate(-50%, -50%)"
+          fontSize="sm"
+          color={colors.BACKGROUND_INVERSE}
+        >
+          Your model will be appear here. After it's projected, you can move it
+          around to place it on your virtual sheet of paper.
+        </Text>
+      )}
+    </Box>
   );
 }

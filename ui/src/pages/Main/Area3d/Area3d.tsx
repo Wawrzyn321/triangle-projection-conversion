@@ -1,4 +1,4 @@
-import { Box, Button, Flex } from '@chakra-ui/react';
+import { Box, Button, Flex, Text } from '@chakra-ui/react';
 import { type ComponentRef, useEffect, useRef, useState } from 'react';
 import { useColors } from '@/shared/useColors';
 import * as THREE from 'three';
@@ -86,48 +86,65 @@ export function Area3d({ setResult }: Props) {
   }
 
   return (
-    <Box h={[undefined, '60vh', '80%']}>
-      <Box position="relative" width="100%" height="100%">
-        <Box h={`calc(100% - ${BOTTOM_BAR_HEIGHT})`} ref={rendererRef}></Box>
-        {!modelLoaded && <FileSelectOverlay onModelLoad={handleLoadModel} />}
-        {modelLoaded && (
-          <OrientationCube
-            vcControllerRef={vcControllerRef}
-            cubeRef={vcCubeRef}
-          />
-        )}
-        <Flex columnGap={2} alignItems="center">
-          {modelLoaded && <Progress progressData={progressData} />}
-          <Box marginLeft="auto" marginTop={1} columnGap={1} display="flex">
-            {modelLoaded && (
+    <Box h="100%">
+      <Box textAlign="center" marginBottom={6}>
+        <Text
+          as="h2"
+          fontSize="lg"
+          fontWeight="semibold"
+          color={colors.BACKGROUND_INVERSE}
+          marginBottom={2}
+        >
+          Convert 3D models to accurate 2D projections
+        </Text>
+        <Text fontSize="md" color={colors.BACKGROUND_INVERSE}>
+          Load an STL file, orient your model, then export the projection as SVG
+          or PDF — preserving exact geometry, not just a screenshot.
+        </Text>
+      </Box>
+      <Box h={[undefined, '60vh', '80%']}>
+        <Box position="relative" width="100%" height="100%">
+          <Box h={`calc(100% - ${BOTTOM_BAR_HEIGHT})`} ref={rendererRef}></Box>
+          {!modelLoaded && <FileSelectOverlay onModelLoad={handleLoadModel} />}
+          {modelLoaded && (
+            <OrientationCube
+              vcControllerRef={vcControllerRef}
+              cubeRef={vcCubeRef}
+            />
+          )}
+          <Flex columnGap={2} alignItems="center">
+            {modelLoaded && <Progress progressData={progressData} />}
+            <Box marginLeft="auto" marginTop={1} columnGap={1} display="flex">
+              {modelLoaded && (
+                <Button
+                  backgroundColor={
+                    colors.theme === 'dark' ? colors.PRIMARY : colors.SECONDARY
+                  }
+                  disabled={isExecuting}
+                  onClick={() => {
+                    handleClearModel();
+                    setResult(null);
+                  }}
+                  color={colors.WHITE}
+                >
+                  Clear
+                </Button>
+              )}
               <Button
                 backgroundColor={
-                  colors.theme === 'dark' ? colors.PRIMARY : colors.SECONDARY
+                  colors.theme === 'dark' ? colors.SECONDARY : colors.PRIMARY
                 }
-                disabled={isExecuting}
-                onClick={() => {
-                  handleClearModel();
-                  setResult(null);
-                }}
+                disabled={!modelLoaded || isExecuting}
+                onClick={executeModel}
                 color={colors.WHITE}
               >
-                Clear
+                Project
               </Button>
-            )}
-            <Button
-              backgroundColor={
-                colors.theme === 'dark' ? colors.SECONDARY : colors.PRIMARY
-              }
-              disabled={!modelLoaded || isExecuting}
-              onClick={executeModel}
-              color={colors.WHITE}
-            >
-              Project
-            </Button>
-          </Box>
-        </Flex>
+            </Box>
+          </Flex>
+        </Box>
+        <Tip hasModel={modelLoaded} />
       </Box>
-      <Tip hasModel={modelLoaded} />
     </Box>
   );
 }
